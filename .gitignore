@@ -1,0 +1,7 @@
+html/node_modules/
+html/.svelte-kit/
+html/build/
+html/dev-dist/
+html/.vite/
+**/__pycache__/
+**/*.pyc

@@ -1,0 +1,734 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+    html {
+        font-size: 12pt;
+        scroll-snap-type: y proximity;
+    }
+
+    body {
+        @apply bg-surface-50-900-token;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-position: center;
+        background-origin: border-box;
+        background-attachment: fixed;
+        overflow-x: clip;
+        position: absolute;
+    }
+
+    p {
+        margin-top: 1ex;
+    }
+
+    .admonition {
+         @apply rounded-container-token;
+         @apply border-secondary-900-50-token;
+         border-width: 1px;
+         margin: 4pt;
+         padding: 8pt;
+    }
+
+    .admonition .first {
+        display: none;
+    }
+
+    .admonition .last {
+        margin-top: 0;
+    }
+
+    .after-overview-container  * {
+        scroll-margin-top: inherit;
+    }
+    
+    .before-overview-container * {
+        scroll-snap-align: start;
+    }
+
+    .route, 
+    .after-overview-container.section,
+    .after-overview-container .section, 
+    .after-overview-container .zoom-able, 
+    .after-overview-container ul.simple > li {
+        scroll-snap-align: start;
+    }
+    
+    .reference {
+        /*color: rgb(var(--color-secondary-800));*/
+        @apply text-on-secondary-token;
+        font-weight: bold;
+    }
+
+    .background {
+        background-position: left bottom;
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }
+
+    .background .has-background {
+        background-color: rgb(var(--color-surface-50)/0.7);
+    }
+
+    svg {
+        font-size: 1rem !important;
+        pointer-events: none;
+        fill: none; /* bug in firefox */
+    }
+    
+    dt {
+        font-style: italic;
+    }
+
+    dd {
+        margin-left: 1em;
+        margin-bottom: 8pt;
+    }
+
+    .zoomed {
+        background-color: rgb(var(--color-surface-50)/0.9);
+    }
+
+    svg text {
+        fill: black;
+    }
+
+    .zoomed svg {
+        pointer-events: all;
+    }
+
+    .icon {
+        display: inline-block;
+        vertical-align: bottom;
+        text-align: center;
+        width: 1em;
+        height: 1em;
+    }
+
+    #marker-popup {
+        z-index: 200;
+        position: fixed;
+        opacity: 0;
+    }
+
+    #marker-popup.show {
+        display: block;
+        opacity: 1;
+    }
+
+    .document hr {
+        border-color: rgb(var(--color-secondary-500));
+    }
+
+    .document p, h1, h2, h3, h4, ul, dl, .image-list, .routestatisics, .route {
+        padding-left: 4pt;
+        padding-right: 4pt;
+    }
+
+    table{
+        margin-left: 4pt;
+        margin-right: 4pt;
+    }
+
+    td {
+        border-width: 1px;
+        padding: 2pt 4pt;
+        text-align: center;
+    }
+    
+    .route-props {
+        padding: 0;
+    }
+
+    #overview-container {
+        padding: 0;
+    }
+
+    h1 {
+        @apply font-heading-token h1 text-on-secondary-token mb-2;
+    }
+
+    .background > .section {
+        padding-bottom: 2ex;
+    }
+
+    .section h1 {
+        @apply font-heading-token h2 text-on-secondary-token mb-2;
+    }
+
+    h2 {
+        margin-top: 2ex;
+        @apply font-heading-token h3 text-on-secondary-token mb-2;
+    }
+
+    h3 {
+        margin-top: 2ex;
+        @apply font-heading-token h4 text-on-secondary-token mb-2;
+    }
+
+    h4 {
+        @apply font-heading-token h5 text-on-secondary-token mb-0;
+    }
+
+    p {
+        @apply font-token text-token;
+    }
+    
+    #overview > div {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        visibility: hidden;
+        opacity: 0;
+        transition: opacity 250ms ease-in, visibility 0ms ease-in 250ms;
+        z-index: 0;
+    }
+
+    #overview > div.show {
+        visibility: visible;
+        opacity: 1;
+        z-index: 100;
+    }
+ 
+    #overview-container {
+        display: flex;
+        flex-direction: column;
+    }
+
+    #overview {
+        position: relative;
+        flex-grow: 1;
+    }
+
+    #breadcrump {
+        padding: 0 4pt;
+        @apply breadcrumb;
+    }
+
+    #breadcrump a {
+        text-wrap: nowrap;
+        color: rgb(var(--color-primary-800))
+    }
+
+    #breadcrump > :not([hidden]) ~ :not([hidden]) {
+        margin-right: 0;
+        margin-left: 0.8rem;
+    }
+
+    @media (min-width: 380px) { 
+        #breadcrump li {
+            display: block;
+        }
+    }
+
+    /* topo svg styles */
+
+    .topo svg {
+        max-width: 100%;
+        max-height: 100%;
+    }
+
+    .topo path {
+        fill: none;
+        stroke: rgb(255, 0, 0);
+        vector-effect: non-scaling-stroke;
+        stroke-width: 2px;
+    }
+
+    .topo rect {
+        fill: rgb(0, 0, 0);
+        stroke: rgb(0, 0, 0);
+    }
+
+    .topo text {
+        fill: rgb(255, 255, 255);
+        stroke: rgb(255, 255, 255);
+        @apply font-token;
+        font-size: 19px;
+    }
+
+    .topo .active-topo path {
+        fill: none;
+        stroke: yellow;
+    }
+
+    .topo .active-topo rect {
+        fill: yellow;
+        stroke: yellow;
+    }
+       
+    .topo .active-topo text {
+        fill: rgb(0, 0, 0);
+        stroke: rgb(0, 0, 0);
+    }
+
+    .topo-route {
+        cursor: pointer;
+        pointer-events: visible;
+    }
+
+    /* leaflet styles */
+
+    .leaflet-marker-icon.bullseye .icon {
+        width: 20px;
+        height: 20px;
+        color: rgb(var(--color-error-800));
+    }
+
+
+    .leaflet-marker-icon .icon {
+        width: auto;
+        height: auto;
+    }
+
+    .leaflet-marker-icon .icon svg {
+        max-width: 3ex;
+        max-height: 3ex;
+    }
+
+    .leaflet-marker-icon path.st1 {
+        fill: none;
+    }
+
+    .leaflet-marker-icon.marker-area .icon path.st0 {
+        fill: rgb(var(--color-secondary-700));
+    }
+
+    .leaflet-marker-icon.marker-sector .icon path.st0 {
+        fill: rgb(var(--color-secondary-700));
+    }
+
+    .leaflet-marker-icon.marker-parking .icon path.st0 {
+        fill: rgb(var(--color-tertiary-700));
+    }
+
+    .leaflet-marker-icon .active .icon path.st1 {
+        fill: rgb(var(--color-tertiary-400));
+    }
+
+    .marker-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .marker-title {
+        width: 20em;
+        height: 1rem;
+        text-wrap: nowrap;
+        position:absolute;
+        color: rgba(var(--theme-font-color-base));
+    }
+
+    .marker-title.zhide {
+        display: none;
+    }
+
+    .marker-title.n {
+        text-align: center;
+        top: -0.9rem;
+    }
+
+    .marker-title.ne {
+        text-align: left;
+        top: -0.5rem;
+        right: -19em;
+    }
+
+    .marker-title.nw {
+        text-align: right;
+        top: -0.5rem;
+        left: -19em;
+    }
+
+    .marker-title.w {
+        text-align: right;
+        left: -19.5em;
+    }
+
+    .marker-title.e {
+        text-align: left;
+        right: -19.5em;
+    }
+
+    .marker-title.s {
+        text-align: center;
+        bottom: -0.9rem;
+    }
+
+    .marker-title.se {
+        text-align: left;
+        bottom: -0.5rem;
+        right: -19em;
+    }
+
+    .marker-title.sw {
+        text-align: right;
+        bottom: -0.5rem;
+        left: -19em;
+    }
+
+
+    ul.simple {
+        margin-top: 1ex;
+        margin-left: 2em;
+        list-style-type: disclosure-closed;
+        padding-left: 0;
+    }
+
+    ul.simple li {
+        padding: 3pt 0;
+    }
+
+    /* sector styles */
+    .routestatisics {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+    
+    .routestatisics svg {
+        max-width: 100%;
+        max-height: 100%;
+    }
+
+    .grade-3 {
+        fill: green;
+        color: green;
+    }
+    .grade-4 {
+        fill: green;
+        color: green;
+    }
+    .grade-4p {
+        fill: green;
+        color: green;
+    }
+    .grade-5 {
+        fill: green;
+        color: green;
+    }
+    .grade-5p {
+        fill: green;
+        color: green;
+    }
+
+    .grade-6a {
+        fill: blue;
+        color: blue;
+    }
+
+    .grade-6ap {
+        fill: blue;
+        color: blue;
+    }
+
+    .grade-6b {
+        fill: blue;
+        color: blue;
+    }
+
+    .grade-6bp {
+        fill: blue;
+        color: blue;
+    }
+
+    .grade-6c {
+        fill: blue;
+        color: blue;
+    }
+
+    .grade-6cp {
+        fill: blue;
+        color: blue;
+    }
+
+    .grade-7a {
+        fill: red;
+        color: red;
+    }
+    .grade-7ap {
+        fill: red;
+        color: red;
+    }
+    .grade-7b {
+        fill: red;
+        color: red;
+    }
+    .grade-7bp {
+        fill: red;
+        color: red;
+    }
+    .grade-7c {
+        fill: red;
+        color: red;
+    }
+    .grade-7cp {
+        fill: red;
+        color: red;
+    }
+    .grade-8a {
+        fill: black;
+        color: black;
+    }
+    .grade-8ap {
+        fill: black;
+        color: black;
+    }
+    .grade-8b {
+        fill: black;
+        color: black;
+    }
+    .grade-8bp {
+        fill: black;
+        color: black;
+    }
+    .grade-8c {
+        fill: black;
+        color: black;
+    }
+
+    /* sector attributes */
+
+    div.attributes {
+        display: flex;
+        margin: 0 1ex;
+    }
+
+    div.attributes ul {
+        margin-top: 1ex;
+        list-style-type: none;
+        padding-left: 0;
+        font-size: smaller;
+    }
+
+    div.attributes li {
+        line-height: normal;
+    }
+
+    .orientation {
+        width: 6em;
+        height: 6em;
+    }
+
+    .season {
+        width: 5.5em;
+        height: 5.5em;
+    }
+
+    .orientation.zoomed, .season.zoomed {
+        width: auto;
+        height: auto;
+    }
+
+    .orientation svg, .season svg {
+        max-width: 100%;
+        max-height: 100%;
+    }
+
+    .season svg path {
+        fill:rgb(var(--color-bad-season)) !important;
+    }
+
+    .season.s-jan svg .s-jan path {
+        fill:rgb(var(--color-good-season)) !important;
+    }
+
+    .season.s-feb svg .s-feb path {
+        fill:rgb(var(--color-good-season)) !important;
+    }
+
+    .season.s-mar svg .s-mar path {
+        fill:rgb(var(--color-good-season)) !important;
+    }
+
+    .season.s-apr svg .s-apr path {
+        fill:rgb(var(--color-good-season)) !important;
+    }
+
+    .season.s-may svg .s-may path {
+        fill:rgb(var(--color-good-season)) !important;
+    }
+
+    .season.s-jun svg .s-jun path {
+        fill:rgb(var(--color-good-season)) !important;
+    }
+
+    .season.s-jul svg .s-jul path {
+        fill:rgb(var(--color-good-season)) !important;
+    }
+
+    .season.s-aug svg .s-aug path {
+        fill:rgb(var(--color-good-season)) !important;
+    }
+
+    .season.s-sep svg .s-sep path {
+        fill:rgb(var(--color-good-season)) !important;
+    }
+
+    .season.s-oct svg .s-oct path {
+        fill:rgb(var(--color-good-season)) !important;
+    }
+
+    .season.s-nov svg .s-nov path {
+        fill:rgb(var(--color-good-season)) !important;
+    }
+
+    .season.s-dec svg .s-dec path {
+        fill:rgb(var(--color-good-season)) !important;
+    }
+
+    .orientation .orientation {
+        display: none;
+    }
+
+    .orientation.nw .orientation.o-nw {
+        display: block;
+    }
+
+    .orientation.n .orientation.o-n {
+        display: block;
+    }
+
+    .orientation.ne .orientation.o-ne {
+        display: block;
+    }
+
+    .orientation.e .orientation.o-e {
+        display: block;
+    }
+
+    .orientation.se .orientation.o-se {
+        display: block;
+    }
+
+    .orientation.s .orientation.o-s {
+        display: block;
+    }
+
+    .orientation.sw .orientation.o-sw {
+        display: block;
+    }
+
+    .orientation.w .orientation.o-w {
+        display: block;
+    }
+
+    /* route styles */
+    .route {
+        margin-top: 2em;
+    }
+
+    .route-number {
+        display: inline-block;
+        background-color: black;
+        color: white;
+        border-radius: 3px;
+        padding: 0 0.5em;
+    }
+
+    .active-route {
+        background-color: rgb(var(--color-warning-100)/0.4);
+    }
+
+    .route:last-child {
+        padding-bottom: 60%;
+        border-bottom: 1px solid rgb(var(--color-secondary-700));
+    }
+
+    ul.route-props {
+        list-style-type: none;
+        font-size: smaller;
+        margin-bottom: 1ex;
+    }
+
+    ul.route-props li {
+        display: inline-block;
+        margin-right: 0.5em;
+        border-bottom: 1px solid rgb(var(--color-secondary-700));
+        line-height: 1.5em;
+    }
+
+    ul.route-props img {
+        height: 1.2em;
+        display: inline-block;
+        padding: 0 2pt;
+    }
+
+    .zoom-able.zoomed {
+        position: fixed !important;
+        z-index: 100 !important;
+        left:0 !important;
+        top:0 !important;
+        bottom: 0 !important;
+        right: 0 !important;
+    }
+
+    .image-title {
+        background-color: rgb(var(--color-surface-50)/0.7);
+    }
+
+    .image-list .text {
+        display: none;
+    }
+
+    .image-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1ex;
+        margin-top: 2ex;
+        margin-bottom: 2ex;
+    }
+
+    .image-list img {
+        max-width: 100%;
+        max-height: 100%;
+    }
+
+    .image-list > div {
+        max-width: min(calc(50% - 0.5ex), 195px);
+        _max-height: 150px;
+        text-align: center;
+    }
+
+    .image-list > div > div {
+        display: none;
+    }
+
+    .image-list > div.zoomed > div {
+        display: block;
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+    }    
+
+    .image-list div.zoomed {
+        max-width: 100%;
+        max-height: 100%;
+    }
+
+    #route_rating {
+        display: none;
+    }
+
+    #route_rating.show {
+        display: block;
+    }
+
+    #route_rating > div {
+        @apply bg-surface-50-900-token;
+    }
+
+    #route_rating img {
+        height: 1.5em;
+        width: fit-content;
+        display: inline-block;
+    }
+
+    .variant-filled-secondary {
+        color: black;
+    }
+}
