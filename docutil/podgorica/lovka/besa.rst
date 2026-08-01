@@ -157,6 +157,17 @@ Besa
     :other:  
     :topo-id: valentin-2
 
+.. route:: Cockta on the Rocks
+    :grade:  7c+
+    :length:  20
+    :stars:  
+    :created:  2026
+    :creator:  Konrad Schlenkrich
+    :first-ascent:  Konrad Schlenkrich
+    :style:  
+    :steepness:  
+    :other:  
+
 .. route:: Besa
     :grade:  7c+
     :length:  20

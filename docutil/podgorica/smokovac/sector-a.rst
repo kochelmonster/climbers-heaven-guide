@@ -42,6 +42,18 @@ Sector A
     :steepness:  
     :other:  
 
+.. route:: Take the Lead
+    :grade:  7b+
+    :length:  25
+    :stars:  
+    :created:  2026
+    :creator:  Elisabeth Erbes
+    :first-ascent:  Elisabeth Erbes
+    :style:  
+    :steepness:  
+    :other:  
+
+
 .. route:: Izvadi Ruku Iz Dupeta
     :grade:  7a+
     :length:  25
@@ -194,6 +206,39 @@ Sector A
     :created:  2010
     :creator:  MAK
     :first-ascent:  
+    :style:  
+    :steepness:  
+    :other:  
+
+.. route:: Grab like a Crab
+    :grade:  6a+
+    :length:  13
+    :stars:  
+    :created:  2026
+    :creator:  Elisabeth Erbes
+    :first-ascent:  Elisabeth Erbes
+    :style:  
+    :steepness:  
+    :other:  
+
+.. route:: Dance of the Scorpions 1
+    :grade:  6b
+    :length:  13
+    :stars:  
+    :created:  2026
+    :creator:  Konrad Schlenkrich
+    :first-ascent:  Konrad Schlenkrich
+    :style:  
+    :steepness:  
+    :other:  
+
+.. route:: Dance of the Scorpions 2
+    :grade:  8a+/b
+    :length:  12
+    :stars:  
+    :created:  2026
+    :creator:  Konrad Schlenkrich
+    :first-ascent:  Konrad Schlenkrich
     :style:  
     :steepness:  
     :other:  

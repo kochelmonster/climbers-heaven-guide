@@ -6,3 +6,5 @@ html/.vite/
 **/__pycache__/
 **/*.pyc
 errors.log
+scripts/route_cache.pickle
+

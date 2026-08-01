@@ -24,6 +24,7 @@ import io
 import tempfile
 import mimetypes
 import base64
+import math
 from PIL import Image
 from collections import defaultdict
 from docutils import nodes
@@ -101,7 +102,136 @@ def name_to_id(name):
     )
 
 
-def save_image_url_to_file(image_url, file_path, rcrop, embedded=False):
+def _to_float(value):
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _rect_to_image_pixels(rcrop, image_size, image_x, image_y, image_width, image_height):
+    img_w, img_h = image_size
+    x = _to_float(image_x)
+    y = _to_float(image_y)
+    w = _to_float(image_width)
+    h = _to_float(image_height)
+
+    # Fallback to legacy behavior when placement data is unavailable.
+    if x is None or y is None or w is None or h is None or w <= 0 or h <= 0:
+        left, top, right, bottom = rcrop
+    else:
+        left = (rcrop[0] - x) * (img_w / w)
+        top = (rcrop[1] - y) * (img_h / h)
+        right = (rcrop[2] - x) * (img_w / w)
+        bottom = (rcrop[3] - y) * (img_h / h)
+
+    left = max(0, min(img_w, math.floor(left)))
+    top = max(0, min(img_h, math.floor(top)))
+    right = max(0, min(img_w, math.ceil(right)))
+    bottom = max(0, min(img_h, math.ceil(bottom)))
+
+    # Keep crop dimensions valid for PIL even if the requested crop is out of range.
+    if right <= left:
+        if left >= img_w:
+            left = max(img_w - 1, 0)
+            right = img_w
+        else:
+            right = min(left + 1, img_w)
+
+    if bottom <= top:
+        if top >= img_h:
+            top = max(img_h - 1, 0)
+            bottom = img_h
+        else:
+            bottom = min(top + 1, img_h)
+
+    return [left, top, right, bottom]
+
+
+def _normalized_view_box(svg, width, height):
+    viewbox = getattr(svg, "viewbox", None)
+    x = 0.0
+    y = 0.0
+
+    if viewbox is not None:
+        if all(hasattr(viewbox, attr) for attr in ("x", "y", "width", "height")):
+            vx = _to_float(getattr(viewbox, "x", None))
+            vy = _to_float(getattr(viewbox, "y", None))
+            if vx is not None:
+                x = vx
+            if vy is not None:
+                y = vy
+        else:
+            tokens = str(viewbox).replace(",", " ").split()
+            if len(tokens) >= 2:
+                vx = _to_float(tokens[0])
+                vy = _to_float(tokens[1])
+                if vx is not None:
+                    x = vx
+                if vy is not None:
+                    y = vy
+
+    return [x, y, float(width), float(height)]
+
+
+def _extract_affine_components(transform_matrix):
+    # svgelements matrix objects usually expose a,b,c,d,e,f.
+    attrs = tuple(_to_float(getattr(transform_matrix, attr, None))
+                  for attr in ("a", "b", "c", "d", "e", "f"))
+    if all(v is not None for v in attrs):
+        return attrs
+
+    # Fallback: parse matrix(...) text representation.
+    text = str(transform_matrix).strip().replace(" ", "")
+    if text.startswith("matrix(") and text.endswith(")"):
+        values = [
+            _to_float(value)
+            for value in text[len("matrix("):-1].split(",")
+        ]
+        if len(values) == 6 and all(v is not None for v in values):
+            return tuple(values)
+
+    return None
+
+
+def _is_identity_like_transform(
+    transform_matrix,
+    scale_tolerance=1e-5,
+    translation_tolerance=1e-3,
+):
+    if transform_matrix is None:
+        return True
+
+    components = _extract_affine_components(transform_matrix)
+    if components is not None:
+        a, b, c, d, e, f = components
+        return (
+            abs(a - 1.0) <= scale_tolerance
+            and abs(b) <= scale_tolerance
+            and abs(c) <= scale_tolerance
+            and abs(d - 1.0) <= scale_tolerance
+            and abs(e) <= translation_tolerance
+            and abs(f) <= translation_tolerance
+        )
+
+    # Last fallback when matrix components are not accessible.
+    try:
+        return transform_matrix.is_identity()
+    except Exception:
+        matrix_text = str(transform_matrix).replace(" ", "")
+        return matrix_text in ("", "none", "matrix(1,0,0,1,0,0)")
+
+
+def save_image_url_to_file(
+    image_url,
+    file_path,
+    rcrop,
+    image_x=0,
+    image_y=0,
+    image_width=None,
+    image_height=None,
+    embedded=False,
+):
     if not image_url.startswith("data:image"):
         raise ValueError("Only data URLs are supported.")
 
@@ -115,7 +245,16 @@ def save_image_url_to_file(image_url, file_path, rcrop, embedded=False):
     image = Image.open(bytes_io)
     # print("topo image",  image.size)
 
-    image = image.crop(rcrop)
+    pixel_crop = _rect_to_image_pixels(
+        rcrop,
+        image.size,
+        image_x,
+        image_y,
+        image_width,
+        image_height,
+    )
+
+    image = image.crop(pixel_crop)
     image = image.convert('RGB')
 
     if embedded:
@@ -721,9 +860,7 @@ class CollectorTransform(Transform):
         cheight = rcrop[3] - rcrop[1]
 
         d = draw.Drawing(int(cwidth), int(cheight))
-        d.view_box = str(svg.viewbox).split(" ")
-        d.view_box[2] = str(int(cwidth))
-        d.view_box[3] = str(int(cheight))
+        d.view_box = [str(v) for v in _normalized_view_box(svg, cwidth, cheight)]
         transform = f"translate({-rcrop[0]}, {-rcrop[1]})"
         """
         print(
@@ -762,10 +899,28 @@ class CollectorTransform(Transform):
                 )
 
             elif isinstance(element, svgelements.Image):
+                transform_matrix = getattr(element, "transform", None)
+                matrix_is_identity = _is_identity_like_transform(
+                    transform_matrix)
+
+                if not matrix_is_identity:
+                    self.document.reporter.warning(
+                        f"Topo image '{path}' uses a non-identity image transform; continuing with position/size-only mapping.",
+                        base_node=node,
+                    )
+
                 path = pathlib.Path(tempdir.name) / f"topo-{index}"
-                path = save_image_url_to_file(element.url, path, rcrop)
+                path = save_image_url_to_file(
+                    element.url,
+                    path,
+                    rcrop,
+                    image_x=element.x,
+                    image_y=element.y,
+                    image_width=element.width,
+                    image_height=element.height,
+                )
                 url = visitor.add_image(path)
-                # url = save_image_url_to_file(element.url, path, rcrop, True)
+                # url = save_image_url_to_file(element.url, path, rcrop, embedded=True)
                 draw_element = SimpleImage(
                     x=0,
                     y=0,

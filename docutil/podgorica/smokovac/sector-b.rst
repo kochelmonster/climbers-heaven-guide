@@ -45,6 +45,16 @@ Sector B
 
     The name is a lie: It is wether small nor ugly and it has only one problem.
 
+.. route:: Lost in Valdanos
+    :grade:  7c/+
+    :length:  23
+    :created:  2026
+    :creator:  Konrad Schlenkrich
+    :first-ascent: Konrad Schlenkrich
+    :style:  
+    :steepness:  
+    :other:  
+
 .. route:: Suncokret
     :grade:  8b+
     :length:  30
@@ -53,6 +63,17 @@ Sector B
     :creator:  Joshua Cook 2019
     :first-ascent:  Dima Panov
     :style:  tufa, fingery, powerful, endurance
+    :steepness:  overhang
+    :other:  
+
+.. route:: Smoki on the Water
+    :grade:  8b/+
+    :length:  30
+    :stars:  
+    :created:  2026
+    :creator:  Konrad Schlenkrich
+    :first-ascent:  Konrad Schlenkrich
+    :style: 
     :steepness:  overhang
     :other:  
 

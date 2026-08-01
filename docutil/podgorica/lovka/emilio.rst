@@ -97,6 +97,17 @@ Emilio
     :steepness:  
     :other:  
 
+.. route:: Alerta Feminista!
+    :grade:  6c+
+    :length:  25
+    :stars:  0
+    :created:  2026
+    :creator:  Elisabeth Erbes
+    :first-ascent:  Elisabeth Erbes
+    :style:  
+    :steepness:  
+    :other:  
+
 .. route:: Prekrasan vrt
     :grade:  6c
     :length:  27

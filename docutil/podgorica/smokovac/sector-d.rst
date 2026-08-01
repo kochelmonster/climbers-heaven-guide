@@ -387,3 +387,14 @@ Sector D
     :steepness:  
     :other:  
 
+.. route:: Rainbow Warrior
+    :grade:  7b
+    :length:  21
+    :stars:  
+    :created:  2026
+    :creator:  Elisabeth Erbes
+    :first-ascent:  Elisabeth Erbes
+    :style:  
+    :steepness:  
+    :other:  
+
