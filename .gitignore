@@ -5,3 +5,4 @@ html/dev-dist/
 html/.vite/
 **/__pycache__/
 **/*.pyc
+errors.log

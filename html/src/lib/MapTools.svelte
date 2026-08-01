@@ -9,12 +9,12 @@ dispatch = createEventDispatcher();
 export gps = false
 
 click_gps = () -> 
-    gps = !gps
-    dispatch('click-gps', gps)
+	gps = !gps
+	dispatch('click-gps', gps)
 
 
 click_bounds = () ->
-    dispatch('click-bounds')
+	dispatch('click-bounds')
 </script>
 
 <style>

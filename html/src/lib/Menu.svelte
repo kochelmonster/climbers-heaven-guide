@@ -40,7 +40,7 @@ import { popup } from '@skeletonlabs/skeleton'
 
 
 move_to_sector = () ->
-	overview.find_nearest_sector()
+	window.overview?.find_nearest_sector()
 
 
 popupMenu =

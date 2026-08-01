@@ -16,7 +16,7 @@ Climbers Heaven Guide is a documentation and web application project that transf
 
 The project follows a three-tier architecture:
 
-```
+```text
 Content Layer (docutil/)
         ↓ Python Compilation (scripts/compile_guide.py)
         ↓
@@ -27,6 +27,7 @@ Web Frontend (Svelte + Vite)
 ```
 
 ### Layer 1: Content Layer (`docutil/`)
+
 - **RST (reStructuredText) source files** documenting climbing routes and areas
 - **Custom docutils directives** for maps, geolocation markers, and route statistics
 - **KML file** for geographic data and marker definitions
@@ -34,6 +35,7 @@ Web Frontend (Svelte + Vite)
 - Language variants: `guide.rst` (English), `guide-de.rst` (German)
 
 ### Layer 2: Compilation Layer (`scripts/`)
+
 - **`compile_guide.py`**: Main build script that:
   - Parses RST files using docutils
   - Applies custom Climbers Heaven directives
@@ -43,6 +45,7 @@ Web Frontend (Svelte + Vite)
 - Supporting scripts for scraping route data, managing images, and editing
 
 ### Layer 3: Web Frontend (`html/`)
+
 - **Svelte Kit**: Modern reactive framework with static site generation
 - **Vite**: Lightning-fast build tool
 - **Tailwind CSS**: Utility-first styling with custom theme
@@ -66,7 +69,7 @@ Web Frontend (Svelte + Vite)
 
 ## 📁 Project Structure
 
-```
+```text
 climbers-heaven-guide/
 ├── docutil/                          # Content layer: RST source files
 │   ├── guide.rst                     # Main English guide
@@ -135,17 +138,22 @@ climbers-heaven-guide/
 ## 📋 Prerequisites
 
 ### Backend (Content Compilation)
+
 - **Conda** or **pip** for Python package management
 - **Python 3.8+**
 - See [scripts/compile_guide.py](scripts/compile_guide.py) for specific Python packages:
   - `docutils` — RST parsing and processing
   - `Pillow` — Image manipulation
   - `svgelements` — SVG creation and manipulation
+  - `drawsvg` — Draw route topo SVG overlays
+  - `pillow-avif-plugin` — AVIF image codec support for Pillow
+  - `defusedxml` — Safe XML parser required for Pillow XMP metadata reading
   - `fastkml` — KML/KMZ geographic data
   - `levenshtein` — String similarity for scraping
-  - `htmlmin` — HTML minification
+  - `minify-html` — HTML minification (`htmlmin` is not compatible with Python 3.13+)
 
 ### Frontend (Web Application)
+
 - **Node.js 18+** and **npm 9+** (or yarn/pnpm)
 - Modern web browser for testing
 
@@ -163,13 +171,13 @@ Using conda (recommended):
 
 ```bash
 conda install docutils Pillow svgelements
-pip install fastkml levenshtein htmlmin
+pip install drawsvg pillow-avif-plugin defusedxml fastkml levenshtein minify-html
 ```
 
 Or using pip directly:
 
 ```bash
-pip install docutils Pillow svgelements fastkml levenshtein htmlmin
+pip install docutils Pillow svgelements drawsvg pillow-avif-plugin defusedxml fastkml levenshtein minify-html
 ```
 
 ### 3. Install Frontend Dependencies
@@ -206,6 +214,7 @@ python compile_guide.py
 ```
 
 **What it does:**
+
 1. Reads RST source files from `docutil/`
 2. Parses custom Climbers Heaven directives (geomap, geolocation, routestatistics)
 3. Generates SVG graphics for route topos
@@ -214,6 +223,7 @@ python compile_guide.py
 6. Generates text version to `html/static/data/guide.txt`
 
 **Inputs:**
+
 - `docutil/guide.rst` — Main English content
 - `docutil/guide-de.rst` — German translations
 - `docutil/Climbersheaven.kml` — Geographic markers
@@ -221,6 +231,7 @@ python compile_guide.py
 - Images in AVIF format
 
 **Outputs:**
+
 - `html/static/data/guide.json` — Structured climbing data
 - `html/static/data/guide.txt` — Plain text export
 - `html/static/data/img/` — Optimized images
@@ -233,6 +244,7 @@ npm run build
 ```
 
 **What it does:**
+
 1. Runs SvelteKit prerendering
 2. Compiles Svelte components to JavaScript
 3. Processes CSS with Tailwind
@@ -241,6 +253,7 @@ npm run build
 6. Outputs production-ready site to `build/`
 
 **Configuration:**
+
 - `svelte.config.js` — Static site adapter, prerender settings
 - `vite.config.js` — Vite bundler configuration
 - `tailwind.config.js` — CSS framework configuration
@@ -302,6 +315,7 @@ See [docutil/readme.md](docutil/readme.md) for detailed documentation on custom 
 Climbers Heaven uses custom docutils directives for enhanced functionality:
 
 ### `.. geomap::`
+
 Displays an interactive map showing climbing area locations.
 
 ```rst
@@ -311,10 +325,12 @@ Displays an interactive map showing climbing area locations.
 ```
 
 Parameters:
+
 - `levels` — Depth of location collection (0 = current section only, 1+ includes subsections)
 - `folder` — KML folder name to display markers from
 
 ### `.. geolocation::`
+
 Marks a specific climbing location on the map.
 
 ```rst
@@ -326,12 +342,14 @@ Marks a specific climbing location on the map.
 ```
 
 Parameters:
+
 - `coords` — Latitude, longitude pair
 - `marker` — Name of KML marker
 - `show-title` — Zoom level when title appears (0 = never)
 - `direction` — Title position (nw, n, ne, e, se, s, sw, w)
 
 ### `.. routestatistics::`
+
 Displays a bar chart of climbing grades for routes in following sections.
 
 ```rst
@@ -345,6 +363,7 @@ See [docutil/readme.md](docutil/readme.md) for complete directive documentation.
 The project supports multiple languages using the Lingui framework:
 
 ### Supported Languages
+
 - **English** (en) — Primary language
 - **German** (de) — German translations
 - **Serbian** (sr) — Serbian translations
@@ -352,11 +371,13 @@ The project supports multiple languages using the Lingui framework:
 ### Adding Translations
 
 1. **Mark translatable strings** in Svelte components:
+
    ```svelte
    <h1>{i18n._('guides.title')}</h1>
    ```
 
 2. **Extract strings** to translation files:
+
    ```bash
    npm run extract
    ```
@@ -364,11 +385,13 @@ The project supports multiple languages using the Lingui framework:
 3. **Add translations** to `src/locales/[lang].po`
 
 4. **Compile translations** to TypeScript:
+
    ```bash
    npm run compile
    ```
 
 ### Translation Files
+
 - `src/locales/en.po` / `en.ts` — English
 - `src/locales/de.po` / `de.ts` — German
 - `src/locales/sr.po` / `sr.ts` — Serbian
@@ -376,40 +399,48 @@ The project supports multiple languages using the Lingui framework:
 ## 🏭 Key Scripts
 
 ### `compile_guide.py`
+
 **Purpose:** Main build script transforming RST content to JSON
 
 **Usage:**
+
 ```bash
 python scripts/compile_guide.py
 ```
 
 **Output:**
+
 - Parses all RST files with custom directives
 - Generates SVG graphics and optimized images
 - Creates `guide.json` with structured climbing data
 - Embeds images as base64 or external references
 
 **Key Features:**
+
 - Custom HTML output writer with Climbers Heaven styling
 - SVG topo generation for climbing routes
 - Image optimization and AVIF conversion
 - Geographic data integration from KML
 
 ### `images.py`
+
 **Purpose:** Image collection, optimization, and embedding
 
 **Usage:** Imported by `compile_guide.py`
 
 **Functionality:**
+
 - Collects images from route descriptions
 - Optimizes and converts to AVIF format
 - Embeds images or links external references
 - Manages image metadata and captions
 
 ### `crags-scraper.py` & `eightanu_scraper.py`
+
 **Purpose:** Scrape route information from external climbing databases
 
 **Usage:**
+
 ```bash
 python scripts/crags-scraper.py
 python scripts/eightanu_scraper.py
@@ -436,11 +467,13 @@ npm run build
 ### PWA Deployment
 
 The project builds as a Progressive Web App with:
+
 - **Service Worker** (`sw.js`) — Enables offline access
 - **Web App Manifest** (`manifest.webmanifest`) — Installation support
 - **Prerendered Static Files** — All content is static HTML, CSS, and JavaScript
 
 Deploy the `html/build/` directory to any static hosting service:
+
 - Vercel
 - Netlify
 - GitHub Pages
@@ -450,6 +483,7 @@ Deploy the `html/build/` directory to any static hosting service:
 ### Environment Variables
 
 For production builds:
+
 ```bash
 VITE_AS_PWA=1 npm run build
 ```
@@ -461,6 +495,7 @@ This enables PWA features for production deployment.
 ### Adding New Climbing Areas
 
 1. **Create RST file** in appropriate region folder:
+
    ```bash
    touch docutil/podgorica/new-area/new-area.rst
    ```
@@ -496,9 +531,10 @@ npm test                  # Run tests
 ### `compile_guide.py` fails with import errors
 
 **Solution:** Verify all Python dependencies are installed:
+
 ```bash
 conda list docutils Pillow svgelements
-pip list | grep fastkml levenshtein htmlmin
+pip list | grep -E "drawsvg|pillow-avif-plugin|defusedxml|fastkml|levenshtein|minify-html"
 ```
 
 Install missing packages as shown in Prerequisites.
@@ -506,6 +542,7 @@ Install missing packages as shown in Prerequisites.
 ### Dev server shows old content after editing RST
 
 **Solution:** The dev server watches files but requires manual recompilation:
+
 ```bash
 python scripts/compile_guide.py  # Recompile content
 # Refresh browser
@@ -514,6 +551,7 @@ python scripts/compile_guide.py  # Recompile content
 ### Build size is too large
 
 **Solution:** Check image optimization:
+
 ```bash
 # Verify images are in AVIF format (smallest)
 find docutil -name "*.png" -o -name "*.jpg"
@@ -525,6 +563,7 @@ python scripts/images.py
 ### PWA not working offline
 
 **Solution:** Verify service worker is generated:
+
 ```bash
 # Check that build/ contains sw.js
 ls -la html/build/sw.js
@@ -543,11 +582,11 @@ ls -la html/build/sw.js
 
 ## 📄 License
 
-[Add your license information here]
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for the full text.
 
 ## 👥 Authors & Contributors
 
-[Add contributor information here]
+kochelmonster
 
 ---
 

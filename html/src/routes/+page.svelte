@@ -102,7 +102,7 @@ onMount () ->
 onDestroy () ->
     overview?.destroy()
     intersector?.destroy()
-    zoom_handler?destroy()
+    zoom_handler?.destroy()
     window?.removeEventListener("request-gps", ask_for_gps)
     window?.removeEventListener("resize", on_resize)
 

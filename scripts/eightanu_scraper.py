@@ -1,15 +1,50 @@
-#import requests
 import pickle
-import cfscrape
+import requests
 from bs4 import BeautifulSoup
 from Levenshtein import ratio
 from pathlib import Path
+
+try:
+    import cloudscraper
+except ImportError:
+    cloudscraper = None
+
+try:
+    import cfscrape
+except Exception:
+    cfscrape = None
 
 CACHE_FILE = Path(__file__).parent / "route_cache.pickle"
 
 DOMAIN = "https://www.8a.nu"
 
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:98.0) Gecko/20100101 Firefox/98.0",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.5",
+    "Accept-Encoding": "gzip, deflate",
+    "Connection": "keep-alive",
+    "Upgrade-Insecure-Requests": "1",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Sec-Fetch-User": "?1",
+    "Cache-Control": "max-age=0",
+}
+
 cache = {}
+
+
+def create_scraper_session():
+    if cloudscraper is not None:
+        scraper = cloudscraper.create_scraper()
+    elif cfscrape is not None:
+        scraper = cfscrape.create_scraper()
+    else:
+        scraper = requests.Session()
+
+    scraper.headers.update(HEADERS)
+    return scraper
 
 def load_cache():
     global cache
@@ -34,27 +69,12 @@ def load_list(url):
         return cache[url]
 
     routes = []
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:98.0) Gecko/20100101 Firefox/98.0",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.5",
-        "Accept-Encoding": "gzip, deflate",
-        "Connection": "keep-alive",
-        "Upgrade-Insecure-Requests": "1",
-        "Sec-Fetch-Dest": "document",
-        "Sec-Fetch-Mode": "navigate",
-        "Sec-Fetch-Site": "none",
-        "Sec-Fetch-User": "?1",
-        "Cache-Control": "max-age=0",
-        }
-
-    scraper = cfscrape.create_scraper()
+    scraper = create_scraper_session()
 
     i = 1
     while True:
         purl = url + f"?page={i}"
         response = scraper.get(purl)
-        # response = requests.get(purl, headers=headers)
         if response.status_code == 200:
             data = response.content
             if not data:
@@ -111,5 +131,5 @@ def find_route_url(url, name):
 
 if __name__ == "__main__":
     url = "https://www.8a.nu/crags/sportclimbing/montenegro/smokovac/routes"
-    print(find_route_url(url, "Svetog Save"))
+    print(find_route_url(url, "Vegan"))
 

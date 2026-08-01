@@ -15,9 +15,13 @@ const config = {
       handleMissingId: "ignore",
     }
   },
+  vitePlugin: {
+    prebundleSvelteLibraries: false,
+  },
   preprocess: [
     sveltePreprocess({
       sourceMap: !production,
+      coffeescript: true,
     }),
     blocklayout()
   ]

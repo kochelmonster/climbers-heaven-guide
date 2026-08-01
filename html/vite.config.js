@@ -9,6 +9,18 @@ import { SvelteKitPWA } from '@vite-pwa/sveltekit'
 let production = process.env["NODE_ENV"] == 'production';
 
 let config = {
+  optimizeDeps: {
+    noDiscovery: true,
+    include: [
+      'actual',
+      '@lingui/core',
+      '@lingui/message-utils/compileMessage',
+      '@messageformat/parser',
+      'leaflet',
+      'lodash/debounce',
+      'unraw'
+    ],
+  },
   plugins: [
     //enhancedImages(),
     sveltekit(),

@@ -2,11 +2,14 @@
 To run this script, you need to install the following packages:
 
 - conda install docutils
-- const install Pillow
+- conda install Pillow
 - conda install svgelements
 - pip install fastkml
 - pip install levenshtein
-- pip install htmlmin
+- pip install minify-html
+- pip install drawsvg
+- pip install pillow-avif-plugin
+- pip install defusedxml
 """
 import logging
 import warnings
@@ -21,7 +24,6 @@ import io
 import tempfile
 import mimetypes
 import base64
-import htmlmin
 from PIL import Image
 from collections import defaultdict
 from docutils import nodes
@@ -32,13 +34,32 @@ from docutils.writers.html4css1 import HTMLTranslator, Writer
 with warnings.catch_warnings(action="ignore"):
     from fastkml import kml
 from Levenshtein import distance
-from eightanu_scraper import find_route_url
+
+try:
+    from eightanu_scraper import find_route_url
+except Exception:
+    find_route_url = None
+
+try:
+    import minify_html as _html_minifier
+except ImportError:
+    # Fallback for older environments that still use the legacy package.
+    try:
+        import htmlmin as _html_minifier
+    except ImportError:
+        _html_minifier = None
 
 __DIR__ = pathlib.Path(__file__).parent
 from images import MImageCollector, MImageHTMLTranslator, write_images
 
 TOPO_ASPECT_RATIO = 0.56  # h / w
 ASPECT_MARGIN = 25
+
+
+def minify_compiled_html(html_body):
+    if _html_minifier is None:
+        return html_body
+    return _html_minifier.minify(html_body)
 
 
 tempdir = None
@@ -945,10 +966,19 @@ class CollectorVisitor(MImageCollector, nodes.SparseNodeVisitor):
             routes.append(node.attributes)
             node.attributes["number"] = len(routes)
 
-        if self.url_8anu and "8anu" not in node.attributes and not self.fast:
-            node.attributes["8anu"] = find_route_url(
-                self.url_8anu, node.attributes["name"]
-            )
+        if (
+            self.url_8anu
+            and "8anu" not in node.attributes
+            and not self.fast
+            and find_route_url is not None
+        ):
+            try:
+                node.attributes["8anu"] = find_route_url(
+                    self.url_8anu, node.attributes["name"]
+                )
+            except Exception:
+                # Keep the compilation running even if online scraping fails.
+                pass
 
     def depart_RouteNode(self, node):
         pass
@@ -1038,7 +1068,7 @@ class MyHTMLTranslator(MImageHTMLTranslator, HTMLTranslator):
 
         for k, v in self.document.topos.items():
             self.body.append(
-                f"""<div id="{k}" class="topo bg-surface-50 zoom-able">{v}{orientation}
+                f"""<div id="{k}" class="topo bg-surface-50 zoom-able">{v}
                 </div>"""
             )
 
@@ -1276,20 +1306,35 @@ def order_coords(coords):
     return [[c[1], c[0]] for c in coords]
 
 
+def iter_kml_features(container):
+    features = getattr(container, "features", None)
+    if callable(features):
+        return list(features())
+    if features is None:
+        return []
+    return list(features)
+
+
 def read_geo_data():
     geo_file = __DIR__.parent / "docutil/Climbersheaven.kml"
 
     with open(geo_file, "rb") as file:
+        data = file.read().decode("utf-8")
         k = kml.KML()
-        k.from_string(file.read().decode("utf-8"))
+        # from_string is a classmethod in fastkml 1.0+ that returns a new object
+        k = k.from_string(data) or k
 
     geo_data = {}
-    document = list(k.features())[0]
-    for folder in document.features():
+    documents = iter_kml_features(k)
+    if not documents:
+        return geo_data
+
+    document = documents[0]
+    for folder in iter_kml_features(document):
         geo_data[folder.name] = placemarks = []
         # print("Folder:", folder.name)
-        for placemark in folder.features():
-            if not placemark.visibility:
+        for placemark in iter_kml_features(folder):
+            if placemark.visibility is not None and not placemark.visibility:
                 continue
 
             parts = placemark.name.split("/")
@@ -1348,7 +1393,7 @@ def _transform(fast=False):
         input_string, source_path=str(guide_file), destination_path=dest, fast=fast
     )
     with open(dest, "w", encoding="utf-8") as file:
-        file.write(htmlmin.minify(output["html_body"]))
+        file.write(minify_compiled_html(output["html_body"]))
 
     write_images(dest_dir, output["images"])
 
@@ -1363,11 +1408,33 @@ def _transform(fast=False):
     first_value = next(iter(output["json_output"].values()))
     output["json_output"][output["first_section"]] = first_value
 
-    with open(dest.with_suffix(".json"), "w", encoding="utf-8") as file:
+    dest_json = dest.with_suffix(".json")
+    with open(dest_json, "w", encoding="utf-8") as file:
         file.write(json.dumps(output["json_output"], default=serialize))
+        
+    print("Compiled guide to", dest_json, "with", len(output["json_output"]), "sections.")
+
+
+class _ColoredStderr:
+    def __init__(self, stream):
+        self._stream = stream
+
+    def write(self, text):
+        if text.strip():
+            color = "\033[33m" if "WARNING" in text else "\033[31m"
+            self._stream.write(f"{color}{text}\033[0m")
+        else:
+            self._stream.write(text)
+
+    def flush(self):
+        self._stream.flush()
+
+    def __getattr__(self, name):
+        return getattr(self._stream, name)
 
 
 if __name__ == "__main__":
+    sys.stderr = _ColoredStderr(sys.stderr)
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.ERROR)
     file_handler = logging.FileHandler('errors.log')

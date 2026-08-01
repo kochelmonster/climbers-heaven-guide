@@ -2,7 +2,7 @@
 
 the paper describes the docutuls extentions for climbers-heaven. Each directive is described in a separate section. First there is a general description of the directive, then you see the call with its default values following by a description of the parameters.
 
-# geomap
+## geomap
 
 Shows a map in the overview section of the document. And display geolocatons of the following sections.
 
@@ -30,6 +30,7 @@ Defines a geolocation of the current section. The geolocation is shown on the ge
     :show-title: 0
     :direction: nw
 ```
+
 coords
 : a latitude, longitude pair like 42.0931, 19.1002
 
@@ -40,9 +41,7 @@ show-title
 : the first zoom level, when the title oft the marker is shown in the map. no means the title will never be shown.
 
 direction
-: the position where the title relativle to the marker is shown. nw (north west), n (north), ne (north east), e (east), se (south east),
-s (south), sw (south west), w (west).
-
+: the position where the title relativle to the marker is shown. nw (north west), n (north), ne (north east), e (east), se (south east), s (south), sw (south west), w (west).
 
 ## routestatistics
 
