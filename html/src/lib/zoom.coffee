@@ -55,6 +55,17 @@ export class ZoomHandler
                     @start_panzoom(element)
 
             element = element.parentElement
+
+    toggle_map_zoom: () =>
+        if @zoomed_element?.id == "map"
+            @stop_panzoom()
+            return
+
+        map = document.getElementById("map")
+        @start_panzoom(map) if map
+
+    emit_map_windowed_change: (state) ->
+        window.dispatchEvent(new CustomEvent("map-windowed-change", detail: !!state))
            
     start_panzoom: (element) =>
         @stop_panzoom()
@@ -63,6 +74,7 @@ export class ZoomHandler
         @zoomed_element = element   
         @zoomed_element.classList.add('zoomed')
         if @zoomed_element.id == "map"
+            @emit_map_windowed_change(true)
             @overview.leaflet.zoomed()
             setTimeout((() =>
                 @overview.leaflet.update_size()
@@ -89,6 +101,7 @@ export class ZoomHandler
         @zoomed_element = null
         el.classList.remove('zoomed')
         if el.id == "map"
+            @emit_map_windowed_change(false)
             setTimeout((() =>
                 @overview.leaflet.update_size()
                 @overview.leaflet.fit_bounds()

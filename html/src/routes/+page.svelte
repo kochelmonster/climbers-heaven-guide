@@ -5,6 +5,16 @@ import { pushState } from "$app/navigation"
 import { get, writable } from 'svelte/store'
 import { getToastStore } from '@skeletonlabs/skeleton'
 import { t } from 'svelte-i18n-lingui'
+import FaCopy from 'svelte-icons/fa/FaCopy.svelte'
+import FaUndoAlt from 'svelte-icons/fa/FaUndoAlt.svelte'
+import {
+    DEFAULT_MAP_PROVIDER_URL,
+    GOOGLE_MAP_PROVIDER_URL,
+    mapProviderUrl,
+    resetMapProviderUrl,
+    setMapProviderUrl,
+    useGoogleMapProviderUrl
+} from '$lib/map-provider.js'
 import debounce from 'lodash/debounce'
 
 version = __APP_VERSION__
@@ -14,6 +24,8 @@ intersector = overview = zoom_handler = content = null
 active_id = writable(null)
 top_id = first_hash = ""
 rating_help = null
+map_provider_dialog = false
+map_provider_input = DEFAULT_MAP_PROVIDER_URL
 
 
 toastStore = getToastStore()
@@ -68,6 +80,46 @@ close = () ->
     @classList.remove("show")
 
 
+open_map_provider_dialog = () ->
+    map_provider_input = $mapProviderUrl
+    map_provider_dialog = true
+
+
+close_map_provider_dialog = () ->
+    map_provider_dialog = false
+
+
+toggle_map_window = () ->
+    zoom_handler?.toggle_map_zoom()
+
+
+notify_map_provider_change = () ->
+    return if typeof window == 'undefined'
+    window.dispatchEvent(new CustomEvent("map-provider-changed", detail: $mapProviderUrl))
+
+
+apply_map_provider = (value) ->
+    setMapProviderUrl(value)
+    map_provider_input = $mapProviderUrl
+    notify_map_provider_change()
+
+
+update_map_provider_input = (event) ->
+    apply_map_provider(event.currentTarget.value)
+
+
+reset_map_provider = () ->
+    resetMapProviderUrl()
+    map_provider_input = $mapProviderUrl
+    notify_map_provider_change()
+
+
+copy_google_map_provider = () ->
+    useGoogleMapProviderUrl()
+    map_provider_input = $mapProviderUrl
+    notify_map_provider_change()
+
+
 check_resize = () ->
     id = get(active_id)
 
@@ -89,6 +141,8 @@ onMount () ->
     first_hash = location.hash
     window.route_rating = route_rating
     load()
+    window.addEventListener("request-map-provider-dialog", open_map_provider_dialog)
+    window.addEventListener("request-map-window-toggle", toggle_map_window)
     window.addEventListener("resize", on_resize)
     console.log("on load", document.referrer)
     if document.referrer != "https://www.climbers-heaven.me/"
@@ -104,6 +158,8 @@ onDestroy () ->
     intersector?.destroy()
     zoom_handler?.destroy()
     window?.removeEventListener("request-gps", ask_for_gps)
+    window?.removeEventListener("request-map-provider-dialog", open_map_provider_dialog)
+    window?.removeEventListener("request-map-window-toggle", toggle_map_window)
     window?.removeEventListener("resize", on_resize)
 
 
@@ -138,6 +194,56 @@ if overview and $active_id
             <div><img src="cevapi-1.svg" alt={$t`Good`}> {$t`Good`}</div>
             <div><img src="cevapi-2.svg" alt={$t`Very good`}> {$t`Very good`}</div>
             <div><img src="cevapi-3.svg" alt={$t`Superb`}>{$t`Superb`}</div>
+        </div>
+    </div>
+</div>
+
+<div id="map-provider-dialog" class:show={map_provider_dialog} class="fixed inset-0 z-40 p-4">
+    <div class="card shadow-xl p-4 map-provider-panel">
+        <div class="map-provider-panel-header">
+            <button
+                type="button"
+                class="btn-icon btn-icon-sm variant-filled"
+                on:click={close_map_provider_dialog}
+                aria-label={$t`Close`}
+                title={$t`Close`}
+            >
+                ✕
+            </button>
+        </div>
+        <p>{$t`Because of license issues we cannot provide a satellite view.`}</p>
+        <label class="map-provider-label" for="map-provider-input">{$t`This is the current map provider:`}</label>
+        <div class="map-provider-row">
+            <input
+                id="map-provider-input"
+                class="input map-provider-input"
+                type="text"
+                bind:value={map_provider_input}
+                on:input={update_map_provider_input}
+                spellcheck="false"
+            >
+            <button
+                type="button"
+                class="btn-icon btn-icon-sm variant-filled map-provider-action-button"
+                on:click={reset_map_provider}
+                aria-label={$t`Reset`}
+                title={$t`Reset`}
+            >
+                <span class="map-provider-icon map-provider-reset-icon"><FaUndoAlt/></span>
+            </button>
+        </div>
+        <p>{$t`For a satellite view you have to enter`}</p>
+        <div class="map-provider-row map-provider-helper-row">
+            <div class="map-provider-helper">{GOOGLE_MAP_PROVIDER_URL}</div>
+            <button
+                type="button"
+                class="btn-icon btn-icon-sm variant-filled map-provider-action-button"
+                on:click={copy_google_map_provider}
+                aria-label={$t`Copy`}
+                title={$t`Copy`}
+            >
+                <span class="map-provider-icon map-provider-copy-icon"><FaCopy/></span>
+            </button>
         </div>
     </div>
 </div>

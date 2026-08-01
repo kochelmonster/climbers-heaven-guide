@@ -19,7 +19,10 @@ class Leaflet
     #tile_url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
     #tile_url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
     
-    map_tile_url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    default_tile_provider_url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    google_tile_provider_url: "https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
+    map_provider_storage_key: "map-provider-url"
+    tile_provider_url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
     map_tile_options:
         minZoom: 0
         maxZoom: 20
@@ -51,7 +54,7 @@ class Leaflet
         # hack:
         # leaflet zoom control will call focus which will scroll the page
         # avoid that scrolling
-        map_container.focus = () -> 
+        map_container.focus = () ->
 
         @measure_marker_box(map_container)
 
@@ -62,14 +65,17 @@ class Leaflet
 
         @add_tools()
 
-        @map_layer = L.tileLayer(@map_tile_url, @map_tile_options)
-        # @satellite_layer = L.tileLayer(@satellite_tile_url, @satellite_tile_options)
-        @map_layer.addTo(@leaflet)
-    
+        @tile_provider_url = @load_tile_provider_url()
+        @replace_tile_layer()
+        window.addEventListener("map-provider-changed", @on_map_provider_changed)
+        window.addEventListener("map-windowed-change", @on_map_windowed_change)
+
         @markers = L.layerGroup().addTo(@leaflet)
         @unzoomed()
 
     destroy: () ->
+        window.removeEventListener("map-provider-changed", @on_map_provider_changed)
+        window.removeEventListener("map-windowed-change", @on_map_windowed_change)
         @leaflet.remove()
 
     add_tools: () ->
@@ -85,6 +91,54 @@ class Leaflet
 
         @toolbar.$on("click-gps", @on_gps)
         @toolbar.$on("click-bounds", @on_bounds)
+        @toolbar.$on("click-fullscreen", @on_fullscreen)
+        @toolbar.$on("click-configure", @on_configure)
+
+    on_configure: () =>
+        window.dispatchEvent(new CustomEvent("request-map-provider-dialog"))
+
+    on_map_provider_changed: ({ detail }) =>
+        @set_tile_provider_url(detail)
+
+    on_map_windowed_change: ({ detail }) =>
+        @toolbar?.$set(fullscreen: !!detail)
+
+    on_fullscreen: () =>
+        window.dispatchEvent(new CustomEvent("request-map-window-toggle"))
+
+    normalize_tile_provider_url: (tile_url) ->
+        tile_url = (tile_url ? "").trim()
+        return @default_tile_provider_url if not tile_url.length
+
+        google_tile_pattern = /^https?:\/\/\{s\}\.google\.com\/vt\/lyrs=s&x=\{x\}&y=\{y\}&z=\{z\}$/
+        return @google_tile_provider_url if google_tile_pattern.test(tile_url)
+
+        return tile_url
+
+    load_tile_provider_url: () ->
+        stored_tile_provider_url = window.localStorage.getItem(@map_provider_storage_key)
+        return @normalize_tile_provider_url(stored_tile_provider_url)
+
+    is_satellite_tile_provider_url: (tile_url) ->
+        normalized_tile_provider_url = @normalize_tile_provider_url(tile_url)
+        return normalized_tile_provider_url == @google_tile_provider_url
+
+    get_tile_options: (tile_url) ->
+        if @is_satellite_tile_provider_url(tile_url)
+            return @satellite_tile_options
+        return @map_tile_options
+
+    replace_tile_layer: () ->
+        @tile_layer?.remove()
+        @tile_layer = L.tileLayer(@tile_provider_url, @get_tile_options(@tile_provider_url))
+        @tile_layer.addTo(@leaflet)
+
+    set_tile_provider_url: (tile_url) =>
+        tile_url = @normalize_tile_provider_url(tile_url)
+        return if tile_url == @tile_provider_url and @tile_layer?
+
+        @tile_provider_url = tile_url
+        @replace_tile_layer()
 
     on_gps: ({ detail }) =>
         if detail
@@ -247,18 +301,6 @@ class Leaflet
         return document.getElementById(id)?.querySelector("h1,h2,h3,h4")?.innerText
 
     update: (data) ->
-        if data.style == "satellite"
-            if not @satellite_layer._map
-                @map_layer.remove()
-                @satellite_layer.addTo(@leaflet)
-        else
-            if not @map_layer._map
-                @satellite_layer.remove()
-                @map_layer.addTo(@leaflet)
-
-        @map_layer = L.tileLayer(@map_tile_url, @map_tile_options)
-        @satellite_layer = L.tileLayer(@satellite_tile_url, @satellite_tile_options)
-
         @markers.clearLayers()
         @current_bounds = L.latLngBounds()
         for obj in data.objects

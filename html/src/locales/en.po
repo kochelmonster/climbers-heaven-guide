@@ -6,3 +6,80 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: @lingui/cli\n"
 "Language: en\n"
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Plural-Forms: \n"
+
+#: src/routes/+page.svelte:254
+msgid "Because of license issues we cannot provide a satellite view."
+msgstr "Because of license issues we cannot provide a satellite view."
+
+#: src/lib/Menu.svelte:19
+msgid "Booking"
+msgstr "Booking"
+
+#: src/routes/+page.svelte:243
+msgid "Čevapi Rating"
+msgstr "Čevapi Rating"
+
+#: src/lib/Menu.svelte:20
+msgid "Climbing Areas"
+msgstr "Climbing Areas"
+
+#: src/routes/+page.svelte:273
+msgid "Close"
+msgstr "Close"
+
+#: src/lib/MapTools.svelte:77
+msgid "Configure map provider"
+msgstr "Configure map provider"
+
+#: src/routes/+page.svelte:270
+msgid "Copy"
+msgstr "Copy"
+
+#: src/routes/+page.svelte:267
+msgid "For a satellite view you have to enter"
+msgstr "For a satellite view you have to enter"
+
+#: src/routes/+page.svelte:245
+#: src/routes/+page.svelte:245
+msgid "Good"
+msgstr "Good"
+
+#: src/lib/Menu.svelte:21
+msgid "Home"
+msgstr "Home"
+
+#: src/lib/Menu.svelte:22
+msgid "Move to current Sector"
+msgstr "Move to current Sector"
+
+#: src/routes/+page.svelte:265
+msgid "Reset"
+msgstr "Reset"
+
+#: src/routes/+page.svelte:247
+#: src/routes/+page.svelte:247
+msgid "Superb"
+msgstr "Superb"
+
+#: src/routes/+page.svelte:255
+msgid "This is the current map provider:"
+msgstr "This is the current map provider:"
+
+#: src/lib/MapTools.svelte:69
+msgid "Toggle map full window"
+msgstr "Toggle map full window"
+
+#: src/lib/MapTools.svelte:69
+#~ msgid "Toggle map fullscreen"
+#~ msgstr "Toggle map fullscreen"
+
+#: src/routes/+page.svelte:246
+#: src/routes/+page.svelte:246
+msgid "Very good"
+msgstr "Very good"
