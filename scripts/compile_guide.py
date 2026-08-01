@@ -34,6 +34,7 @@ from docutils.writers.html4css1 import HTMLTranslator, Writer
 with warnings.catch_warnings(action="ignore"):
     from fastkml import kml
 from Levenshtein import distance
+from images import MImageCollector, MImageHTMLTranslator, directive_source_file, render_image_list_html, write_images
 
 try:
     from eightanu_scraper import find_route_url
@@ -50,7 +51,7 @@ except ImportError:
         _html_minifier = None
 
 __DIR__ = pathlib.Path(__file__).parent
-from images import MImageCollector, MImageHTMLTranslator, write_images
+
 
 TOPO_ASPECT_RATIO = 0.56  # h / w
 ASPECT_MARGIN = 25
@@ -365,7 +366,7 @@ class Topo(Directive):
     has_content = False
 
     def run(self):
-        source_path = pathlib.Path(self.state_machine.input_lines.source(0))
+        source_path = directive_source_file(self)
         path = source_path.parent / directives.path(self.arguments[0])
         return [TopoNode(self.block_text, path=path, routes=[])]
 
@@ -604,7 +605,16 @@ class CollectorTransform(Transform):
         self.document.topos = {}
         self.document.background_images = visitor.background_images
         self.document.transform_messages[:] = []
-       
+
+        for node in visitor.image_list_nodes:
+            html = render_image_list_html(
+                node.attributes.get("ls_images", ()),
+                node.attributes.get("pt_images", ()),
+                self.document.image_titles,
+            )
+            node.replace_self(
+                nodes.raw("", html, format="html") if html else [])
+
         crop_rects = [self.get_crop_rect(node) for node in visitor.topos]
         aspect = TOPO_ASPECT_RATIO
         min_aspect = 0
@@ -1008,7 +1018,7 @@ class CollectorVisitor(MImageCollector, nodes.SparseNodeVisitor):
             self.last_section_id = id_
             if not self.first_section:
                 self.first_section = id_
-            
+
         self.section_ids.append(id_)
         self.route_number = 0
 
@@ -1268,7 +1278,7 @@ class MyHTMLTranslator(MImageHTMLTranslator, HTMLTranslator):
 
         klass = "section"
         if "geomap" in props or "topo" in props:
-             if self.insert_overview_container():
+            if self.insert_overview_container():
                 h3klass = "h-3"
                 if "has-background" in klasses:
                     h3klass += " has-background"
@@ -1277,7 +1287,7 @@ class MyHTMLTranslator(MImageHTMLTranslator, HTMLTranslator):
 
         elif not self.overview_container_done:
             klass += " before-overview-container"
-                
+
         # the next is a modified super().visit_section(node)
         self.section_level += 1
         self.body.append(self.starttag(node, "div", CLASS=klass))
@@ -1300,7 +1310,7 @@ class MyHTMLTranslator(MImageHTMLTranslator, HTMLTranslator):
         except Exception:
             pass
         return super().section_title_tags(node)
-    
+
 
 def order_coords(coords):
     return [[c[1], c[0]] for c in coords]
@@ -1411,8 +1421,9 @@ def _transform(fast=False):
     dest_json = dest.with_suffix(".json")
     with open(dest_json, "w", encoding="utf-8") as file:
         file.write(json.dumps(output["json_output"], default=serialize))
-        
-    print("Compiled guide to", dest_json, "with", len(output["json_output"]), "sections.")
+
+    print("Compiled guide to", dest_json, "with",
+          len(output["json_output"]), "sections.")
 
 
 class _ColoredStderr:

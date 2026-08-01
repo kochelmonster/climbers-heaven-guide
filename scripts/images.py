@@ -7,6 +7,37 @@ from docutils import nodes
 from docutils.parsers.rst import Directive, directives
 
 
+def directive_source_file(directive):
+    doc_source = directive.state.document.get("source")
+    candidates = [
+        getattr(directive.state.document, "current_source", None),
+        directive.state_machine.input_lines.source(0),
+        doc_source,
+    ]
+
+    for source in candidates:
+        if not source:
+            continue
+
+        path = pathlib.Path(source)
+        if path.is_absolute() and path.exists():
+            return path
+
+        cwd_path = (pathlib.Path.cwd() / path).resolve()
+        if cwd_path.exists():
+            return cwd_path
+
+        if doc_source:
+            doc_parent = pathlib.Path(doc_source).resolve().parent
+            doc_relative_path = (doc_parent / path).resolve()
+            if doc_relative_path.exists():
+                return doc_relative_path
+
+        return path.resolve()
+
+    return pathlib.Path(".").resolve()
+
+
 class ImageListNode(nodes.Element):
     pass
 
@@ -20,12 +51,13 @@ class ImageList(Directive):
     }
 
     def run(self):
-        source_path = pathlib.Path(
-            self.state_machine.input_lines.source(0)).parent
+        source_path = directive_source_file(self).parent
         paths = " ".join(self.arguments)
         paths = [source_path/p.strip() for p in paths.split(",")]
-        paths = [pathlib.Path(path)
-                 for p in paths for path in glob.glob(str(p))]
+        matched_paths = []
+        for pattern in paths:
+            matched_paths.extend(glob.glob(str(pattern), recursive=True))
+        paths = [pathlib.Path(path) for path in dict.fromkeys(matched_paths)]
 
         # sort for image height
         landscape = []
@@ -61,8 +93,7 @@ class Img(Directive):
     }
 
     def run(self):
-        source_path = pathlib.Path(
-            self.state_machine.input_lines.source(0)).parent
+        source_path = directive_source_file(self).parent
         path = source_path/self.arguments[0]
         return [ImgNode(self.block_text, path=path, **self.options)]
 
@@ -81,7 +112,7 @@ class Background(Directive):
     option_spec = {}
 
     def run(self):
-        source_path = pathlib.Path(self.state_machine.input_lines.source(0))
+        source_path = directive_source_file(self)
         path = source_path.parent / directives.path(self.arguments[0])
         return [BackgroundNode(self.block_text, path=path)]
 
@@ -95,6 +126,7 @@ class MImageCollector:
         self.background_images = {}
         self.images = {}
         self.image_titles = {}
+        self.image_list_nodes = []
 
     def image_path_to_url(self, path):
         return path
@@ -138,6 +170,7 @@ class MImageCollector:
         node.attributes["pt_images"] = [
             self.add_image(p, reduce=True, comment=True)
             for p in node.attributes["portrait"]]
+        self.image_list_nodes.append(node)
 
     def depart_ImageListNode(self, node):
         pass
@@ -162,24 +195,14 @@ class MImageHTMLTranslator:
         return path
 
     def visit_ImageListNode(self, node):
-        for key in ("ls_images", "pt_images"):
-            images = node.attributes.get(key, ())
-            if not images:
-                continue
-
-            self.body.append('<div class="image-list"><div class="text">double click to zoom</div>')
-
-            for img in images:
-                url = self.image_path_to_url(img)
-                title = self.document.image_titles.get(img, "")
-                self.body.append(
-                    f"""<div class="zoom-able">
-                        <img src="{url}" alt="{title}"/>""")
-                if title:
-                    self.body.append(f"""<div class="image-title">{title}</div>""")
-                self.body.append('</div>')
-
-            self.body.append('</div>')
+        html = render_image_list_html(
+            node.attributes.get("ls_images", ()),
+            node.attributes.get("pt_images", ()),
+            self.document.image_titles,
+            self.image_path_to_url,
+        )
+        if html:
+            self.body.append(html)
 
     def depart_ImageListNode(self, node):
         pass
@@ -217,6 +240,30 @@ class MImageHTMLTranslator:
 
     def depart_BackgroundNode(self, node):
         pass
+
+
+def render_image_list_html(landscape, portrait, image_titles, image_path_to_url=lambda path: path):
+    parts = []
+    for images in (landscape, portrait):
+        if not images:
+            continue
+
+        parts.append('<div class="image-list"><div class="text">double click to zoom</div>')
+
+        for img in images:
+            url = image_path_to_url(img)
+            title = image_titles.get(img, "")
+            parts.append(
+                f"""<div class="zoom-able">
+                        <img src="{url}" alt="{title}"/>"""
+            )
+            if title:
+                parts.append(f"""<div class="image-title">{title}</div>""")
+            parts.append('</div>')
+
+        parts.append('</div>')
+
+    return "".join(parts)
 
 
 def write_images(dest_dir, images):
