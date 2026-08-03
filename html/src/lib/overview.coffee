@@ -16,6 +16,8 @@ marker_type =
 
 class Leaflet
     leaflet: null
+    contrast_threshold: 145
+    contrast_sample_size: 3
     #tile_url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
     #tile_url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
     
@@ -28,6 +30,7 @@ class Leaflet
         maxZoom: 20
         maxNativeZoom: 19
         attribution: false
+        crossOrigin: true
     
     satellite_tile_url: "http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
     satellite_tile_options:
@@ -36,6 +39,7 @@ class Leaflet
         maxZoom: 20
         maxNativeZoom: 19
         attribution: false
+        crossOrigin: true
 
     map_options:
         center: [42.858534, 19.102059]
@@ -50,6 +54,10 @@ class Leaflet
     constructor: () ->
         map_container = document.getElementById("map")
         @marker_box = {}
+        @contrast_canvas = document.createElement("canvas")
+        @contrast_canvas.width = @contrast_canvas.height = @contrast_sample_size
+        @contrast_context = @contrast_canvas.getContext("2d", willReadFrequently: true)
+        @contrast_sampling_enabled = !!@contrast_context
 
         # hack:
         # leaflet zoom control will call focus which will scroll the page
@@ -61,6 +69,7 @@ class Leaflet
         @leaflet = L.map(map_container, @map_options)
         @leaflet.setMaxBounds(@map_options.maxBounds)
         @leaflet.on("zoomend", @on_zoom)
+        @leaflet.on("moveend", @schedule_marker_contrast_update)
         window.leaflet = @leaflet
 
         @add_tools()
@@ -76,6 +85,7 @@ class Leaflet
     destroy: () ->
         window.removeEventListener("map-provider-changed", @on_map_provider_changed)
         window.removeEventListener("map-windowed-change", @on_map_windowed_change)
+        @tile_layer?.off("load", @schedule_marker_contrast_update)
         @leaflet.remove()
 
     add_tools: () ->
@@ -129,8 +139,10 @@ class Leaflet
         return @map_tile_options
 
     replace_tile_layer: () ->
+        @tile_layer?.off("load", @schedule_marker_contrast_update)
         @tile_layer?.remove()
         @tile_layer = L.tileLayer(@tile_provider_url, @get_tile_options(@tile_provider_url))
+        @tile_layer.on("load", @schedule_marker_contrast_update)
         @tile_layer.addTo(@leaflet)
 
     set_tile_provider_url: (tile_url) =>
@@ -253,9 +265,9 @@ class Leaflet
             if parseInt(obj.show_title) > 0
                 direction += " zoom-" + obj.show_title
 
-        color = ""
+        container_style = ""
         if obj.color
-            color += """ style="color:#{obj.color}" """
+            container_style += """ style="--marker-custom-color:#{obj.color}" """
 
         
         a_attribute = if obj.href 
@@ -263,8 +275,8 @@ class Leaflet
         else 
             ""
 
-        html = """<a class="marker-container"#{a_attribute}>
-               <div class="marker-title #{direction}"#{color}>#{title}</div>
+         html = """<a class="marker-container"#{a_attribute}#{container_style}>
+             <div class="marker-title #{direction}">#{title}</div>
                <div class="icon">#{marker_type[type]}</div></a>"""
 
         box = anchor = @marker_box[type]
@@ -289,6 +301,93 @@ class Leaflet
         c.querySelectorAll(".zhide").forEach (e) -> e.classList.remove("zhide")
         for i in [0...@leaflet.getZoom()]
             c.querySelectorAll(".zoom-"+i).forEach (e) -> e.classList.add("zhide")
+        @schedule_marker_contrast_update()
+
+    schedule_marker_contrast_update: () =>
+        return if @contrast_update_scheduled
+
+        @contrast_update_scheduled = true
+        requestAnimationFrame(() =>
+            @contrast_update_scheduled = false
+            @refresh_marker_contrast()
+        )
+
+    refresh_marker_contrast: () =>
+        container = @leaflet?.getContainer()
+        return if not container
+
+        for marker_element in container.querySelectorAll(".leaflet-marker-icon .marker-container")
+            marker_element.classList.remove("contrast-dark-bg", "contrast-light-bg")
+            marker_element.classList.add(@marker_contrast_mode(marker_element))
+
+    marker_contrast_mode: (marker) ->
+        return @fallback_marker_contrast_mode() if not @contrast_sampling_enabled
+
+        luminances = []
+        for point in @marker_sample_points(marker)
+            luminance = @sample_background_luminance(point.x, point.y)
+            luminances.push(luminance) if luminance?
+
+        return @fallback_marker_contrast_mode() if not luminances.length
+
+        average = luminances.reduce(((sum, value) -> sum + value), 0) / luminances.length
+        if average < @contrast_threshold then "contrast-dark-bg" else "contrast-light-bg"
+
+    fallback_marker_contrast_mode: () ->
+        if @is_satellite_tile_provider_url(@tile_provider_url)
+            return "contrast-dark-bg"
+        return "contrast-light-bg"
+
+    marker_sample_points: (marker) ->
+        samples = []
+
+        for element in [marker.querySelector(".icon"), marker.querySelector(".marker-title:not(.zhide)")]
+            continue if not element
+
+            rect = element.getBoundingClientRect()
+            continue if rect.width == 0 or rect.height == 0
+
+            samples.push
+                x: rect.left + rect.width / 2
+                y: rect.top + rect.height / 2
+
+        return samples
+
+    sample_background_luminance: (x, y) ->
+        tile = @find_loaded_tile_at_point(x, y)
+        return null if not tile
+
+        rect = tile.getBoundingClientRect()
+        return null if not rect.width or not rect.height or not tile.naturalWidth or not tile.naturalHeight
+
+        sample_size = @contrast_sample_size
+        sx = Math.round((x - rect.left) / rect.width * tile.naturalWidth - sample_size / 2)
+        sy = Math.round((y - rect.top) / rect.height * tile.naturalHeight - sample_size / 2)
+        sx = Math.max(0, Math.min(tile.naturalWidth - sample_size, sx))
+        sy = Math.max(0, Math.min(tile.naturalHeight - sample_size, sy))
+
+        try
+            @contrast_context.clearRect(0, 0, sample_size, sample_size)
+            @contrast_context.drawImage(tile, sx, sy, sample_size, sample_size, 0, 0, sample_size, sample_size)
+            pixels = @contrast_context.getImageData(0, 0, sample_size, sample_size).data
+        catch error
+            console.warn("Marker contrast sampling disabled", error)
+            @contrast_sampling_enabled = false
+            return null
+
+        luminance = 0
+        for index in [0...pixels.length] by 4
+            luminance += 0.2126 * pixels[index] + 0.7152 * pixels[index + 1] + 0.0722 * pixels[index + 2]
+
+        return luminance / (pixels.length / 4)
+
+    find_loaded_tile_at_point: (x, y) ->
+        for tile in @leaflet.getContainer().querySelectorAll(".leaflet-tile-loaded")
+            rect = tile.getBoundingClientRect()
+            if rect.left <= x <= rect.right and rect.top <= y <= rect.bottom
+                return tile
+
+        return null
 
     fit_bounds: () ->
         return if not @current_bounds
@@ -319,11 +418,13 @@ class Leaflet
                         @current_bounds.extend(c)
 
         @fit_bounds()
+        @schedule_marker_contrast_update()
 
         check_fit_bounds = () =>
             # a hack of a leaflet bug?
             # console.log("check_fit_bounds", @current_bounds, @leaflet.getBounds())
             @fit_bounds()
+            @schedule_marker_contrast_update()
 
         setTimeout(check_fit_bounds, 500)
 

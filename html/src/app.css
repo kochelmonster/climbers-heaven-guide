@@ -353,6 +353,41 @@
         color: rgb(var(--color-error-800));
     }
 
+    .leaflet-marker-icon {
+        --marker-title-color: var(--marker-custom-color, rgba(var(--theme-font-color-base)));
+        --marker-outline-color: rgba(255, 255, 255, 0.95);
+        --marker-symbol-color: var(--marker-custom-color, rgba(var(--theme-font-color-base)));
+        --marker-active-color: rgb(255, 255, 255);
+        --marker-active-stroke-color: rgba(0, 0, 0, 0.85);
+    }
+
+    .leaflet-marker-icon.marker-area,
+    .leaflet-marker-icon.marker-sector {
+        --marker-symbol-dark: rgb(var(--color-secondary-800));
+        --marker-symbol-light: rgb(var(--color-secondary-100));
+    }
+
+    .leaflet-marker-icon.marker-parking {
+        --marker-symbol-dark: rgb(var(--color-tertiary-800));
+        --marker-symbol-light: rgb(var(--color-tertiary-100));
+    }
+
+    .leaflet-marker-icon .marker-container.contrast-dark-bg {
+        --marker-title-color: rgb(255, 255, 255);
+        --marker-outline-color: rgba(0, 0, 0, 0.92);
+        --marker-symbol-color: var(--marker-custom-color, var(--marker-symbol-light));
+        --marker-active-color: rgb(12, 12, 12);
+        --marker-active-stroke-color: rgba(115, 20, 20, 0.9);
+    }
+
+    .leaflet-marker-icon .marker-container.contrast-light-bg {
+        --marker-title-color: var(--marker-custom-color, rgba(var(--theme-font-color-base)));
+        --marker-outline-color: rgba(255, 255, 255, 0.95);
+        --marker-symbol-color: var(--marker-custom-color, var(--marker-symbol-dark));
+        --marker-active-color: rgb(255, 255, 255);
+        --marker-active-stroke-color: rgba(115, 20, 20, 0.9);
+    }
+
 
     .leaflet-marker-icon .icon {
         width: auto;
@@ -362,26 +397,23 @@
     .leaflet-marker-icon .icon svg {
         max-width: 3ex;
         max-height: 3ex;
+        filter: drop-shadow(0 0 0.18rem var(--marker-outline-color)) drop-shadow(0 0 0.08rem var(--marker-outline-color));
     }
 
     .leaflet-marker-icon path.st1 {
         fill: none;
     }
 
-    .leaflet-marker-icon.marker-area .icon path.st0 {
-        fill: rgb(var(--color-secondary-700));
-    }
-
-    .leaflet-marker-icon.marker-sector .icon path.st0 {
-        fill: rgb(var(--color-secondary-700));
-    }
-
-    .leaflet-marker-icon.marker-parking .icon path.st0 {
-        fill: rgb(var(--color-tertiary-700));
+    .leaflet-marker-icon .icon path.st0 {
+        fill: var(--marker-symbol-color);
     }
 
     .leaflet-marker-icon .active .icon path.st1 {
-        fill: rgb(var(--color-tertiary-400));
+        fill: var(--marker-active-color);
+        stroke: var(--marker-active-stroke-color);
+        stroke-width: 1pt;
+        vector-effect: non-scaling-stroke;
+        filter: drop-shadow(0 0 0.22rem var(--marker-active-stroke-color));
     }
 
     .marker-container {
@@ -396,7 +428,8 @@
         height: 1rem;
         text-wrap: nowrap;
         position:absolute;
-        color: rgba(var(--theme-font-color-base));
+        color: var(--marker-title-color);
+        text-shadow: 0 0 0.35rem var(--marker-outline-color), 0 0 0.15rem var(--marker-outline-color);
     }
 
     .marker-title.zhide {

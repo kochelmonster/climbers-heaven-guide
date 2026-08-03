@@ -16,6 +16,7 @@ Sector C
     :children: yes
 
 .. routestatistics::
+    :summary: w
 
 .. topo:: sector-c.svg
 
