@@ -66,12 +66,12 @@ export class Intersector
                 delete @intersecting_elements[c.target.id]
 
         depth = 0
-        top = 0
+        top = -Infinity
         for id, c of @intersecting_elements
-            if c.depth > depth or c.depth == depth and top < c.getBoundingClientRect().top
+            current_top = c.getBoundingClientRect().top
+            if current_top > top or current_top == top and c.depth > depth
                 depth = c.depth
-                top = c.getBoundingClientRect().top
+                top = current_top
                 te = c
 
-        # console.log("intersect", te, @intersecting_elements)
         @active.set(te.id) if te
