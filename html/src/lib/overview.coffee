@@ -443,6 +443,7 @@ class PreloadLeaflet
         maxZoom: 20
         maxNativeZoom: 19
         attribution: false
+        crossOrigin: true
     map_options:
         center: [42.858534, 19.102059]
         zoom: 8

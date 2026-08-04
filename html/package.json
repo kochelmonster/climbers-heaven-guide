@@ -1,6 +1,6 @@
 {
 	"name": "guide",
-	"version": "1.2.70",
+	"version": "1.2.72",
 	"private": true,
 	"license": "MIT",
 	"scripts": {

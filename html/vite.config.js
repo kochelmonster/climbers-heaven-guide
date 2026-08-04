@@ -86,13 +86,13 @@ let config = {
             urlPattern: /^https:\/\/.\.tile\.openstreetmap\.org\/.*/,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'map-tiles',
+              cacheName: 'map-tiles-v2',
               expiration: {
                 maxEntries: 1000,
                 maxAgeSeconds: 60 * 60 * 24 * 365 // <== 365 days
               },
               cacheableResponse: {
-                statuses: [0, 200]
+                statuses: [200]
               }
             }
           }
