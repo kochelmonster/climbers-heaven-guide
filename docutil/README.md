@@ -1,10 +1,10 @@
-# climbers-heaven docutils extentions
+# Climbers-Heaven Docutils Extensions
 
-the paper describes the docutuls extentions for climbers-heaven. Each directive is described in a separate section. First there is a general description of the directive, then you see the call with its default values following by a description of the parameters.
+This guide documents the docutils extensions used by Climbers-Heaven. Each directive has its own section with a short description, a usage example with default values, and a list of the available parameters.
 
 ## geomap
 
-Shows a map in the overview section of the document. And display geolocatons of the following sections.
+Shows a map in the overview section and displays the geolocations collected from the current section and its subsections.
 
 ```docutils
 .. geomap::
@@ -13,15 +13,14 @@ Shows a map in the overview section of the document. And display geolocatons of 
 ```
 
 levels
-: How deep the geolocations are collected. A value of 0 means only locations in the current section are considered. A value of 1 means also locations in the subsections are considered. And so on.
+: Controls how deeply geolocations are collected. A value of 0 includes only the current section. A value of 1 also includes the subsections, and so on.
 
 folder
-: a folder name in Climbers-Heaven.kml. The geomap will show all visible
-objects defined in the folder on the map.
+: The name of a folder in Climbers-Heaven.kml. The geomap shows all visible objects defined in that folder.
 
 ## geolocation
 
-Defines a geolocation of the current section. The geolocation is shown on the geomap. And marked aktive if the section header is prominent.
+Defines the geolocation of the current section. The location appears on the geomap and is marked active when the section heading is prominent.
 
 ```docutils
 .. geolocation::
@@ -32,20 +31,20 @@ Defines a geolocation of the current section. The geolocation is shown on the ge
 ```
 
 coords
-: a latitude, longitude pair like 42.0931, 19.1002
+: A latitude and longitude pair such as 42.0931, 19.1002.
 
 marker
-: the name of a marker in Climbers-Heaven.kml. The marker has to be in the folder specified in the previous geomap directive.
+: The name of a marker in Climbers-Heaven.kml. The marker must be in the folder specified by the preceding geomap directive.
 
 show-title
-: the first zoom level, when the title oft the marker is shown in the map. no means the title will never be shown.
+: The first zoom level at which the marker title is shown on the map. Use no if the title should never be shown.
 
 direction
-: the position where the title relativle to the marker is shown. nw (north west), n (north), ne (north east), e (east), se (south east), s (south), sw (south west), w (west).
+: The position of the title relative to the marker. Valid values are nw (north west), n (north), ne (north east), e (east), se (south east), s (south), sw (south west), and w (west).
 
 ## routestatistics
 
-Shows a bar chart of the grades of the routes that are described in the following sections.
+Shows a bar chart of the grades of the routes described in the following sections.
 
 ```docutils
 .. routestatistics::
@@ -54,31 +53,31 @@ Shows a bar chart of the grades of the routes that are described in the followin
 ```
 
 levels
-: How deep the routes for the statics are collected. A value of 0 means only routes in the current section are considered. A value of 1 means also routes in the subsections are considered. And so on.
+: Controls how deeply routes are collected for the statistics. A value of 0 includes only the current section. A value of 1 also includes the subsections, and so on.
 
 summary
-: Where to place the number of routes in the chart. e (east) means on the right side of the chart. w (west) means on the left side of the chart.
+: Controls where the total number of routes appears in the chart. e (east) places it on the right side, and w (west) places it on the left side.
 
 ## imagelist
 
-Displays th given images. If the xmp comment is set in the metadata of the image, the comment is shown as subtitle of the image.
+Displays the given images. If an XMP comment is set in the image metadata, the comment is shown as the image subtitle.
 
 ```docutils
 .. imagelist:: [comma separated list of path patterns]
    
 ```
 
-An example for a path list:
+An example path list:
 
 ```docutils
 .. imagelist:: ./pics/*.jpg, ./pics/**/*.jpg
 ```
 
-The first pattern adds all jpg images in the pics folder the second recusrsively adds all jpgs of any subfolders.
+The first pattern adds all jpg images in the pics folder. The second pattern recursively adds all jpg images in any subfolder.
 
 ## background
 
-Sets the background image of the current section.
+Sets the background image for the current section.
 
 ```docutils
 .. background:: path-to-image
@@ -86,7 +85,7 @@ Sets the background image of the current section.
 
 ## topo
 
-Defines a topo svg for the current section.
+Defines an SVG topo for the current section.
 
 ```docutils
 .. topo:: path-to-svg
@@ -94,7 +93,7 @@ Defines a topo svg for the current section.
 
 ## attributes
 
-Set the attributes of a sector.
+Sets the attributes of a sector.
 
 ```docutils
 
@@ -110,28 +109,28 @@ Set the attributes of a sector.
 ```
 
 rock
-: posible values: granite, limestone, sandstone, quartzite
+: Possible values: granite, limestone, sandstone, quartzite.
 
 orientation
-: a choice of these values: n, ne, e, se, s, sw, w, nw
+: Possible values: n, ne, e, se, s, sw, w, nw.
 
 season
-: best season to climb
+: The best season for climbing.
 
 sun
-: time of the day the sector is in the sun
+: The time of day when the sector is in the sun.
 
 children
-: suitable for children
+: Indicates whether the sector is suitable for children.
 
 altitude
-: elevation of the sector in meter
+: The elevation of the sector, in meters.
 
 approach
-: time to approach the sector in minutes
+: The approach time to the sector, in minutes.
 
 driesafterrain
-: how long it takes until the sector is dry after rain
+: How long the sector takes to dry after rain.
 
 ## route
 
@@ -153,35 +152,34 @@ Describes a route.
 ```
 
 grade
-: French grade
+: The French grade.
 
 length
-: Length of the route in meters
+: The route length in meters.
 
 bolts
-: Count of bolts
+: The number of bolts.
 
 style
-: A choice of these values: fingery, powerful, dyno, tufa, pockets, crack, endurance, technical, mental, tufa, crag
+: Possible values: fingery, powerful, dyno, tufa, pockets, crack, endurance, technical, mental, crag.
 
 steepness
-: A choice of these values: slab, vertical, overhang, roof
+: Possible values: slab, vertical, overhang, roof.
 
 other
-: A choice of these values dangerous, partly bolted, runout
+: Possible values: dangerous, partly bolted, runout.
 
 stars
-: Beauty of the route 0-4
+: The route quality from 0 to 4 stars.
 
 created
-: Year of creation
+: The year the route was created.
 
 creator
-: Creator of the route
+: The creator of the route.
 
 first-ascent
-: first ascent
+: The climber or team that made the first ascent.
 
 topo-id
-: id in the topo svg. This option is usually not needed because, the
-route will be linked to the topo by the name. But if the name is not unique like "Open Project" you can use the topo-id.
+: The ID used in the topo SVG. This option is usually not needed because the route is linked to the topo by name. Use it only when the route name is not unique, such as Open Project.

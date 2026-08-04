@@ -246,8 +246,8 @@ Podgorica is the Capital of Montenegro and provides the most climbing routes.
 
 .. geolocation::
     :coords: 42.4304, 19.2594
-    :direction: se
-    :show-title: 7
+    :direction: nw
+    :show-title: yes
 
 .. geomap::
 
@@ -347,6 +347,7 @@ Kotor
 .. geolocation::
     :coords: 42.422312, 18.771284
     :show-title: 8
+    :direction: s
 
 
 COMMING SOON
@@ -421,8 +422,8 @@ Berane
 
 .. geolocation::
     :coords: 42.836145, 19.868047
-    :direction: se
-    :show-title: 8
+    :direction: ne
+    :show-title: yes
 
 COMMING SOON
 
@@ -434,7 +435,8 @@ Gusinje
 
 .. geolocation::
     :coords: 42.564345, 19.832602
-    :show-title: 8
+    :show-title: yes
+    :direction: e
 
 COMMING SOON
 

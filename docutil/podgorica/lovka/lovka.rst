@@ -7,7 +7,7 @@ The small village of Lovka is situated above the cijevna canyon.
 
 .. geolocation::
     :coords: 42.397468, 19.398008
-    :show-title: 14
+    :show-title: yes
     :direction: ne
 
 .. routestatistics::
