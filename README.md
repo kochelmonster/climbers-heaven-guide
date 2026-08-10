@@ -2,9 +2,11 @@
 
 A comprehensive climbing route guide application featuring interactive maps, multi-language support, and offline access via Progressive Web App (PWA) technology. This project combines reStructuredText (RST) documentation with a modern Svelte-based web frontend to create an engaging climbing destination guide.
 
+**If you are a route setter and want to add a new route, follow the step-by-step workflow in [tutorial.md](tutorial.md).**
+
 ## 🏔️ Project Overview
 
-Climbers Heaven Guide is a documentation and web application project that transforms detailed climbing route descriptions (written in RST format) into an interactive, interactive web application. It covers climbing destinations across Montenegro and surrounding areas, featuring:
+Climbers Heaven Guide is a web application project that transforms detailed climbing route descriptions (written in RST format) into an interactive web application. It covers climbing destinations across Montenegro and surrounding areas, featuring:
 
 - **Interactive Maps**: Geo-located climbing areas with custom markers
 - **Route Information**: Detailed climbing route descriptions with grades, statistics, and guides
@@ -79,7 +81,7 @@ climbers-heaven-guide/
 │   └── [regions]/                    # Regional climbing guides
 │       ├── bar/                      # Bar region (Menke, Stari Bar, Župci)
 │       ├── durmitor/                 # Durmitor mountain region
-│       ├── kolasin/                  # Kola šin region
+│       ├── kolasin/                  # Kolašin region
 │       └── podgorica/                # Podgorica area
 │           ├── lovka/                # Lovka sector (largest)
 │           ├── smokovac/             # Smokovac sector
@@ -308,7 +310,8 @@ npm test                 # Run unit tests with Vitest
 5. **Recompile** with `python scripts/compile_guide.py`
 6. **Test locally** with `npm run dev` in `html/`
 
-See [docutil/readme.md](docutil/readme.md) for detailed documentation on custom RST directives and formatting.
+See [docutil/README.md](docutil/README.md) for detailed documentation on custom RST directives and formatting.
+
 
 ## 📜 Custom RST Directives
 
@@ -356,7 +359,7 @@ Displays a bar chart of climbing grades for routes in following sections.
 .. routestatistics::
 ```
 
-See [docutil/readme.md](docutil/readme.md) for complete directive documentation.
+See [docutil/README.md](docutil/README.md) for complete directive documentation.
 
 ## 🌍 Internationalization (i18n)
 
@@ -461,8 +464,10 @@ cd ../html
 # Build frontend
 npm run build
 
-# Output is in ./build/
+# Output is written to ./build/ (relative to the html/ directory)
 ```
+
+The generated site is available in [html/build/](html/build/).
 
 ### PWA Deployment
 
@@ -573,7 +578,7 @@ ls -la html/build/sw.js
 
 ## 📚 Additional Resources
 
-- [docutil/readme.md](docutil/readme.md) — Custom RST directives documentation
+- [docutil/README.md](docutil/README.md) — Custom RST directives documentation
 - [html/README.md](html/README.md) — Frontend-specific setup and development
 - [reStructuredText Documentation](https://docutils.sourceforge.io/rst.html)
 - [Svelte Documentation](https://svelte.dev)

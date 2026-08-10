@@ -66,6 +66,9 @@ If any symbol is unclear, tap it and you will find help.
 
 In the menu, the option "Move to current Sector" will take you to the sector nearest your current GPS location.
 
+The sources of this guide are published on `GitHub <https://github.com/kochelmonster/climbers-heaven-guide>`__.
+
+
 Climbing grade conversion table
 ===============================
 
@@ -407,7 +410,7 @@ Kolašin
 
 Nice climbings in the warmer months.
 
-COMMING SOON
+.. include:: kolasin/kolasin.rst
 
 -----------------
 
