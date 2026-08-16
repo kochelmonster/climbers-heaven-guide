@@ -52,7 +52,7 @@ Scorpion Wall
     :creator:  
     :first-ascent:  
     :style:  
-    :steepness: 
+    :steepness: vertical
     :other:  
 
 .. route:: Glavna stanica Kolašin
@@ -76,3 +76,15 @@ Scorpion Wall
     :style:  
     :steepness:  vertical
     :other:  
+
+.. route:: The last rope jump
+    :grade:  6b
+    :length:  15
+    :stars:  
+    :created:  
+    :creator:  
+    :first-ascent:  
+    :style:  
+    :steepness:  vertical
+    :other:  
+  
