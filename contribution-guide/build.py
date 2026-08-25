@@ -284,32 +284,32 @@ def topo_link(topo):
 
 
 def render_svg_editor_wrapper():
-        return f'''<!doctype html>
+    return '''<!doctype html>
 <html>
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="mobile-web-app-capable" content="yes">
-    <link rel="icon" href="{SVGEDIT_CDN_EDITOR}/images/logo.svg">
+    <link rel="icon" href="{editor}/images/logo.svg">
     <style id="styleoverrides" media="screen"></style>
-    <link href="{SVGEDIT_CDN_EDITOR}/svgedit.css" rel="stylesheet" media="all">
-    <script type="module" src="{SVGEDIT_CDN_EDITOR}/browser-not-supported.js"></script>
+    <link href="{editor}/svgedit.css" rel="stylesheet" media="all">
+    <script type="module" src="{editor}/browser-not-supported.js"></script>
     <title>SVG-edit</title>
 </head>
 <body style="margin:0">
     <div id="container" style="width:100%;height:100vh"></div>
     <noscript>SVG-Edit requires JavaScript.</noscript>
     <script type="module">
-        import Editor from '{SVGEDIT_CDN_EDITOR}/Editor.js'
+        import Editor from '{editor}/Editor.js'
         import {{ applySvgEditPatch }} from './svgedit-patch.js'
 
         const svgEditor = new Editor(document.getElementById('container'))
         svgEditor.setConfig({{
             initFill: {{ color: 'none', opacity: 1 }},
             initStroke: {{ color: 'FF0000', opacity: 1, width: 2 }},
-            imgPath: '{SVGEDIT_CDN_EDITOR}/images',
-            extPath: '{SVGEDIT_CDN_EDITOR}/extensions',
+            imgPath: '{editor}/images',
+            extPath: '{editor}/extensions',
             allowInitialUserOverride: true,
             extensions: [],
             noDefaultExtensions: false,
@@ -319,7 +319,7 @@ def render_svg_editor_wrapper():
     </script>
 </body>
 </html>
-'''
+'''.format(editor=SVGEDIT_CDN_EDITOR)
 
 
 def render_index(sectors):
@@ -404,21 +404,27 @@ def render_editor():
 
 
 def page(title, body, root="../", head=""):
-    return f'''<!doctype html>
+    return '''<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{escape(title)}</title>
+<title>{title}</title>
 <link rel="stylesheet" href="{root}style.css">
 {head}
 </head>
 <body>
-<header><a href="{escape(GITHUB_REPOSITORY_URL, quote=True)}">Climbers Heaven Contribution Guide</a></header>
+<header><a href="{repository_url}">Climbers Heaven Contribution Guide</a></header>
 <main>{body}</main>
 </body>
 </html>
-'''
+'''.format(
+        title=escape(title),
+        root=root,
+        head=head,
+        repository_url=escape(GITHUB_REPOSITORY_URL, quote=True),
+        body=body,
+    )
 
 
 def build():
