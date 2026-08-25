@@ -1376,8 +1376,7 @@ class MyHTMLTranslator(MImageHTMLTranslator, HTMLTranslator):
             self.body.append(f"<li>Style: {', '.join(props['style'])}</li>")
 
         if props.get("steepness"):
-            self.body.append(f"<li>Steepness: {
-                             ', '.join(props['steepness'])}</li>")
+            self.body.append(f"<li>Steepness: {', '.join(props['steepness'])}</li>")
 
         if props.get("other"):
             self.body.append(f"<li>Other: {', '.join(props['other'])}</li>")
