@@ -7,4 +7,4 @@ html/.vite/
 **/*.pyc
 errors.log
 scripts/route_cache.pickle
-
+contribution-guide/site/
