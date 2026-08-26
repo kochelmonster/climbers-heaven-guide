@@ -2,7 +2,7 @@
 
 A comprehensive climbing route guide application featuring interactive maps, multi-language support, and offline access via Progressive Web App (PWA) technology. This project combines reStructuredText (RST) documentation with a modern Svelte-based web frontend to create an engaging climbing destination guide.
 
-**If you are a route setter and want to add a new route, contribute via the project on [GitHub](https://github.com/kochelmonster/climbers-heaven-guide).**
+**If you are a route setter and want to add a new route, contribute via the project on [GitHub](https://kochelmonster.github.io/climbers-heaven-guide/).**
 
 ## 🏔️ Project Overview
 

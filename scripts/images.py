@@ -217,17 +217,14 @@ class MImageHTMLTranslator:
 
         title = self.document.image_titles.get(img, "")
         if node.attributes.get("zoomable", False):
-            self.body.append(
-                f"""<div class="zoom-able">
-                    <img src="{url}" alt="{title}"/>""")
+            self.body.append(f'<div class="zoom-able"><img src="{url}" alt="{title}"/></div>')
 
             if title:
-                self.body.append(f"""<div class="image-title">{title}</div>""")
+                self.body.append(f'<div class="image-title">{title}</div>')
 
             self.body.append('</div>')
         else:
-            self.body.append(f'<div class="pic"><img src="{
-                             url}" alt="{title}"/></div>')
+            self.body.append(f'<div class="pic"><img src="{url}" alt="{title}"/></div>')
 
         if klass:
             self.body.append(f'</div>')
@@ -253,12 +250,9 @@ def render_image_list_html(landscape, portrait, image_titles, image_path_to_url=
         for img in images:
             url = image_path_to_url(img)
             title = image_titles.get(img, "")
-            parts.append(
-                f"""<div class="zoom-able">
-                        <img src="{url}" alt="{title}"/>"""
-            )
+            parts.append(f'<div class="zoom-able"><img src="{url}" alt="{title}"/>')
             if title:
-                parts.append(f"""<div class="image-title">{title}</div>""")
+                parts.append(f'<div class="image-title">{title}</div>')
             parts.append('</div>')
 
         parts.append('</div>')

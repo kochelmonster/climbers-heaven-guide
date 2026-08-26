@@ -1233,8 +1233,8 @@ class MyHTMLTranslator(MImageHTMLTranslator, HTMLTranslator):
 
         for k, v in self.document.topos.items():
             self.body.append(
-                f"""<div id="{k}" class="topo bg-surface-50 zoom-able">{v}
-                </div>"""
+                """<div id="{}" class="topo bg-surface-50 zoom-able">{}
+                </div>""".format(k, v)
             )
 
         self.body.append(
@@ -1246,7 +1246,7 @@ class MyHTMLTranslator(MImageHTMLTranslator, HTMLTranslator):
     def visit_RouteStatisticsNode(self, node):
         svg = node.attributes["collector"].draw()
         self.body.append(
-            f"""<div class="routestatisics zoom-able">{svg}</div>""")
+            """<div class="routestatisics zoom-able">{}</div>""".format(svg))
 
     def depart_RouteStatisticsNode(self, node):
         pass
@@ -1279,8 +1279,9 @@ class MyHTMLTranslator(MImageHTMLTranslator, HTMLTranslator):
         try:
             coords = node.attributes["coords"]
             self.body.append(
-                f"""<li>Location: {coords[0]:.4f}, {
-                    coords[1]:.4f}</li>"""
+                """<li>Location: {:.4f}, {:.4f}</li>""".format(
+                    coords[0], coords[1]
+                )
             )
         except KeyError:
             pass
@@ -1309,8 +1310,8 @@ class MyHTMLTranslator(MImageHTMLTranslator, HTMLTranslator):
         self.body.append("</ul>")
         if "orientation" in node.attributes:
             self.body.append(
-                f"""<div class="orientation zoom-able {" ".join(node.attributes["orientation"])}">
-                {KOMPASS}</div>"""
+                """<div class="orientation zoom-able {}">
+                {}</div>""".format(" ".join(node.attributes["orientation"]), KOMPASS)
             )
 
         if "season" in node.attributes:
@@ -1331,7 +1332,7 @@ class MyHTMLTranslator(MImageHTMLTranslator, HTMLTranslator):
             klasses = " ".join("s-" + months[m - 1]
                                for m in node.attributes["season"])
             self.body.append(
-                f"""<div class="season zoom-able {klasses}">{SEASON}</div>"""
+                """<div class="season zoom-able {}">{}</div>""".format(klasses, SEASON)
             )
 
         self.body.append("</div>")
@@ -1352,11 +1353,11 @@ class MyHTMLTranslator(MImageHTMLTranslator, HTMLTranslator):
         rgrade = props.get("grade", "").strip()
         gclass = "grade-" + rgrade.replace("+", "p")
         self.body.append(
-            f"""<a href="#{id_}"><h4>
-            <span class="route-number">{props["number"]}</span>
-            {props["name"]}
-            <span class="route-grade {gclass}">{rgrade}
-            </span></h4></a>"""
+            """<a href="#{}"><h4>
+            <span class="route-number">{}</span>
+            {}
+            <span class="route-grade {}">{}
+            </span></h4></a>""".format(id_, props["number"], props["name"], gclass, rgrade)
         )
         self.body.append(self.starttag(node, "ul", CLASS="route-props"))
         if props.get("length"):
@@ -1365,8 +1366,8 @@ class MyHTMLTranslator(MImageHTMLTranslator, HTMLTranslator):
         if int(props.get("stars", 0) or 0):
             alt = CEVAPI_RATING.get(props["stars"], "")
             self.body.append(
-                f"""<li><a href="javascript:route_rating()">
-                <img alt="{alt}" src="cevapi-{props['stars']}.svg"/></a></li>"""
+                """<li><a href="javascript:route_rating()">
+                <img alt="{}" src="cevapi-{}.svg"/></a></li>""".format(alt, props["stars"])
             )
 
         if props.get("bolts"):
@@ -1376,8 +1377,7 @@ class MyHTMLTranslator(MImageHTMLTranslator, HTMLTranslator):
             self.body.append(f"<li>Style: {', '.join(props['style'])}</li>")
 
         if props.get("steepness"):
-            self.body.append(f"<li>Steepness: {
-                             ', '.join(props['steepness'])}</li>")
+            self.body.append(f"<li>Steepness: {', '.join(props['steepness'])}</li>")
 
         if props.get("other"):
             self.body.append(f"<li>Other: {', '.join(props['other'])}</li>")
@@ -1393,8 +1393,8 @@ class MyHTMLTranslator(MImageHTMLTranslator, HTMLTranslator):
 
         if props.get("8anu"):
             self.body.append(
-                f"""<li><a href="{props['8anu']}
-                    " target="_blank">&#x261B 8a.nu</a></li>"""
+                """<li><a href="{}
+                    " target="_blank">&#x261B 8a.nu</a></li>""".format(props["8anu"])
             )
 
         self.body.append("</ul>")
@@ -1425,8 +1425,7 @@ class MyHTMLTranslator(MImageHTMLTranslator, HTMLTranslator):
             pass
         else:
             self.body.append(
-                f'<div class="background" style="background-image: url({
-                    bgimage})">'
+                '<div class="background" style="background-image: url({})">'.format(bgimage)
             )
             klasses.append("has-background")
             node["classes"] = klasses
@@ -1437,7 +1436,7 @@ class MyHTMLTranslator(MImageHTMLTranslator, HTMLTranslator):
                 h3klass = "h-3"
                 if "has-background" in klasses:
                     h3klass += " has-background"
-                self.body.append(f"""<div class="{h3klass}"></div>""")
+                self.body.append("""<div class="{}"></div>""".format(h3klass))
                 klass += " after-overview-container"
 
         elif not self.overview_container_done:
