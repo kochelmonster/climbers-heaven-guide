@@ -145,12 +145,14 @@ onMount () ->
     window.addEventListener("request-map-window-toggle", toggle_map_window)
     window.addEventListener("resize", on_resize)
     console.log("on load", document.referrer)
+    ###
     if document.referrer != "https://www.climbers-heaven.me/"
         toastStore.trigger
             message: "<a href=\"https://www.climbers-heaven.me/\" target=\"_blank\">Book your climbing vacation at Climbers Heaven</a>"
             type: "info"
             duration: 25000
             autohide: true
+    ###
     
 
 onDestroy () ->
